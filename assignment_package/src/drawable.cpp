@@ -1,28 +1,24 @@
 #include "drawable.h"
-#include <glm_includes.h>
+#include <la.h>
 
 Drawable::Drawable(OpenGLContext* context)
-    : m_count(-1), m_countTrans(-2), m_bufUV(), m_bufChunk(), m_bufIdx(), m_bufPos(), m_bufNor(), m_bufCol(),
-    m_uvGenerated(false), m_chunkGenerated(false), m_idxGenerated(false), m_posGenerated(false), m_norGenerated(false), m_colGenerated(false),
-    m_chunkGeneratedTrans(false), m_idxGeneratedTrans(false), m_bufChunkTrans(), m_bufIdxTrans(), m_bufLL(), m_llGenerated(false),
-    mp_context(context)
+    : count(-1), bufIdx(), bufPos(), bufNor(), bufCol(),
+      idxBound(false), posBound(false), norBound(false), colBound(false),
+      mp_context(context)
 {}
 
-Drawable::~Drawable()
-{}
+Drawable::~Drawable() {
+    destroy();
+}
 
 
-void Drawable::destroyVBOdata()
+void Drawable::destroy()
 {
-    mp_context->glDeleteBuffers(1, &m_bufUV);
-    mp_context->glDeleteBuffers(1, &m_bufChunk);
-    mp_context->glDeleteBuffers(1, &m_bufIdx);
-    mp_context->glDeleteBuffers(1, &m_bufPos);
-    mp_context->glDeleteBuffers(1, &m_bufNor);
-    mp_context->glDeleteBuffers(1, &m_bufCol);
-    //mp_context->glDeleteBuffers(1, &m_bufUV);
-    m_chunkGenerated = m_idxGenerated = m_posGenerated = m_norGenerated = m_colGenerated = m_uvGenerated = false;
-    m_count = -1;
+    mp_context->glDeleteBuffers(1, &bufIdx);
+    mp_context->glDeleteBuffers(1, &bufPos);
+    mp_context->glDeleteBuffers(1, &bufNor);
+    mp_context->glDeleteBuffers(1, &bufCol);
+
 }
 
 GLenum Drawable::drawMode()
@@ -38,168 +34,66 @@ GLenum Drawable::drawMode()
 
 int Drawable::elemCount()
 {
-    return m_count;
-}
-
-int Drawable::elemCountTrans()
-{
-    return m_countTrans;
-}
-void Drawable::generateUV() {
-    m_uvGenerated = true;
-    mp_context->glGenBuffers(1, &m_bufUV);
-}
-
-void Drawable::generateChunkTrans() {
-    m_chunkGeneratedTrans = true;
-    mp_context->glGenBuffers(1, &m_bufChunkTrans);
-}
-
-void Drawable::generateIdxTrans()
-{
-    m_idxGeneratedTrans = true;
-    mp_context->glGenBuffers(1, &m_bufIdxTrans);
-}
-
-void Drawable::generateChunk() {
-    m_chunkGenerated = true;
-    mp_context->glGenBuffers(1, &m_bufChunk);
+    return count;
 }
 
 void Drawable::generateIdx()
 {
-    m_idxGenerated = true;
+    idxBound = true;
     // Create a VBO on our GPU and store its handle in bufIdx
-    mp_context->glGenBuffers(1, &m_bufIdx);
+    mp_context->glGenBuffers(1, &bufIdx);
 }
 
 void Drawable::generatePos()
 {
-    m_posGenerated = true;
+    posBound = true;
     // Create a VBO on our GPU and store its handle in bufPos
-    mp_context->glGenBuffers(1, &m_bufPos);
+    mp_context->glGenBuffers(1, &bufPos);
 }
 
 void Drawable::generateNor()
 {
-    m_norGenerated = true;
+    norBound = true;
     // Create a VBO on our GPU and store its handle in bufNor
-    mp_context->glGenBuffers(1, &m_bufNor);
+    mp_context->glGenBuffers(1, &bufNor);
 }
 
 void Drawable::generateCol()
 {
-    m_colGenerated = true;
+    colBound = true;
     // Create a VBO on our GPU and store its handle in bufCol
-    mp_context->glGenBuffers(1, &m_bufCol);
-}
-
-void Drawable::generateLL()
-{
-    m_colGenerated = true;
-    // Create a VBO on our GPU and store its handle in bufCol
-    mp_context->glGenBuffers(1, &m_bufLL);
-}
-
-bool Drawable::bindUV() {
-    if(m_uvGenerated) {
-        mp_context->glBindBuffer(GL_ARRAY_BUFFER, m_bufUV);
-    }
-    return m_uvGenerated;
-}
-
-bool Drawable::bindLL() {
-    if(m_llGenerated) {
-        mp_context->glBindBuffer(GL_ARRAY_BUFFER, m_bufLL);
-    }
-    return m_llGenerated;
-}
-
-bool Drawable::bindChunkTrans() {
-    if(m_chunkGeneratedTrans) {
-        mp_context->glBindBuffer(GL_ARRAY_BUFFER, m_bufChunkTrans);
-    }
-    return m_chunkGeneratedTrans;
-}
-
-bool Drawable::bindIdxTrans()
-{
-    if(m_idxGeneratedTrans) {
-        mp_context->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_bufIdxTrans);
-    }
-    return m_idxGeneratedTrans;
-}
-
-bool Drawable::bindChunk() {
-    if(m_chunkGenerated) {
-        mp_context->glBindBuffer(GL_ARRAY_BUFFER, m_bufChunk);
-    }
-    return m_chunkGenerated;
+    mp_context->glGenBuffers(1, &bufCol);
 }
 
 bool Drawable::bindIdx()
 {
-    if(m_idxGenerated) {
-        mp_context->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_bufIdx);
+    if(idxBound) {
+        mp_context->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufIdx);
     }
-    return m_idxGenerated;
+    return idxBound;
 }
 
 bool Drawable::bindPos()
 {
-    if(m_posGenerated){
-        mp_context->glBindBuffer(GL_ARRAY_BUFFER, m_bufPos);
+    if(posBound){
+        mp_context->glBindBuffer(GL_ARRAY_BUFFER, bufPos);
     }
-    return m_posGenerated;
+    return posBound;
 }
 
 bool Drawable::bindNor()
 {
-    if(m_norGenerated){
-        mp_context->glBindBuffer(GL_ARRAY_BUFFER, m_bufNor);
+    if(norBound){
+        mp_context->glBindBuffer(GL_ARRAY_BUFFER, bufNor);
     }
-    return m_norGenerated;
+    return norBound;
 }
 
 bool Drawable::bindCol()
 {
-    if(m_colGenerated){
-        mp_context->glBindBuffer(GL_ARRAY_BUFFER, m_bufCol);
+    if(colBound){
+        mp_context->glBindBuffer(GL_ARRAY_BUFFER, bufCol);
     }
-    return m_colGenerated;
+    return colBound;
 }
 
-InstancedDrawable::InstancedDrawable(OpenGLContext *context)
-    : Drawable(context), m_numInstances(0), m_bufPosOffset(-1), m_offsetGenerated(false)
-{}
-
-InstancedDrawable::~InstancedDrawable(){}
-
-int InstancedDrawable::instanceCount() const {
-    return m_numInstances;
-}
-
-void InstancedDrawable::generateOffsetBuf() {
-    m_offsetGenerated = true;
-    mp_context->glGenBuffers(1, &m_bufPosOffset);
-}
-
-bool InstancedDrawable::bindOffsetBuf() {
-    if(m_offsetGenerated){
-        mp_context->glBindBuffer(GL_ARRAY_BUFFER, m_bufPosOffset);
-    }
-    return m_offsetGenerated;
-}
-
-void InstancedDrawable::clearOffsetBuf() {
-    if(m_offsetGenerated) {
-        mp_context->glDeleteBuffers(1, &m_bufPosOffset);
-        m_offsetGenerated = false;
-    }
-}
-void InstancedDrawable::clearColorBuf() {
-    if(m_colGenerated) {
-        mp_context->glDeleteBuffers(1, &m_bufCol);
-        m_colGenerated = false;
-    }
-}

@@ -1,7 +1,0 @@
-For unordered map stuff: https://www.geeksforgeeks.org/different-ways-to-initialize-an-unordered_map-in-cpp/
-For AO: https://0fps.net/2013/07/03/ambient-occlusion-for-minecraft-like-worlds/
-      : https://gamedev.stackexchange.com/questions/54583/shadowmap-moving-with-camera
-For Shadow Mapping: https://www.opengl-tutorial.org/intermediate-tutorials/tutorial-16-shadow-mapping/#setting-up-the-rendertarget-and-the-mvp-matrix:
-https://www.opengl-tutorial.org/intermediate-tutorials/tutorial-14-render-to-texture/
-https://stackoverflow.com/questions/29557752/stable-shadow-mapping
-Adam

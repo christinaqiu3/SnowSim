@@ -1,5 +1,0 @@
-Lewis  - For adding the uv textures to the blocks i decided to pass the uv coords to he gpu using the existing color VBO. Becuase it was a vec4, that allowed me to use the extra slot as an indicator as to weather or not the texture should be animated. For the transparent faces, I created a new interleaved vector and a new index vector and filled them with data depending on the block type (WATER vs STONE etc). I would then bind the opaque vbos and draw them using the original vector set, then i would bind this new transparent VBO vector set and draw all the transparent blocks on top. 
-
-Christina - I did the cave generation and framebuffering. I decided to just have one shaderprogram file without an extra postprocessshader file. I check if player position is in a water/lava block to do physics. I treat water and lava blocks as if they are empty blocks so player can go through them. I experimented with the perlin values to make the caves look better.
-
-Aaron - I did multithreading. I fed blocktype works whole TGZ at a time and they would work through it and pass through the chunks they had completed and they would pass it to VBO workers.

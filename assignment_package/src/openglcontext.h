@@ -1,14 +1,20 @@
 #pragma once
 
 #include <QOpenGLWidget>
-#include <QTimer>
-#include <QOpenGLExtraFunctions>
-
+#include <QOpenGLFunctions_3_2_Core>
 
 class OpenGLContext
     : public QOpenGLWidget,
-      public QOpenGLExtraFunctions
+      public QOpenGLFunctions_3_2_Core
 {
+    Q_OBJECT
+
+
+
+protected:
+    /*** AUTOMATIC TESTING: DO NOT MODIFY ***/
+    /*** If true, save a test image and exit */
+    /***/ bool autotesting;
 
 public:
     OpenGLContext(QWidget *parent);
@@ -18,4 +24,12 @@ public:
     void printGLErrorLog();
     void printLinkInfoLog(int prog);
     void printShaderInfoLog(int shader);
+
+private slots:
+    /*** AUTOMATIC TESTING: DO NOT MODIFY ***/
+    /***/ void saveImageAndQuit();
+
+    virtual void timerUpdate(){}
+
+
 };

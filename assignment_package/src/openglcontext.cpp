@@ -1,4 +1,5 @@
 #include "openglcontext.h"
+#include <utils.h>
 
 #include <iostream>
 #include <QApplication>
@@ -9,10 +10,12 @@
 
 OpenGLContext::OpenGLContext(QWidget *parent)
     : QOpenGLWidget(parent)
-{}
+{
+}
 
 OpenGLContext::~OpenGLContext()
-{}
+{
+}
 
 inline const char *glGS(GLenum e)
 {
@@ -142,3 +145,11 @@ void OpenGLContext::printShaderInfoLog(int shader)
     // Throwing here allows us to use the debugger to track down the error.
     throw;
 }
+
+/*** AUTOMATIC TESTING: DO NOT MODIFY ***/
+/***/ void OpenGLContext::saveImageAndQuit() {
+/***/     glFlush();
+/***/     QImage image = grabFramebuffer();
+/***/     image.save("image.png");
+/***/     QApplication::quit();
+/***/ }

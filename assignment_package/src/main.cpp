@@ -21,11 +21,12 @@ void debugFormatVersion()
 
 int main(int argc, char *argv[])
 {
+    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QApplication a(argc, argv);
 
-    // Set OpenGL 4.0 and, optionally, 4-sample multisampling
+    // Set OpenGL 3.2 and, optionally, 4-sample multisampling
     QSurfaceFormat format;
-    format.setVersion(4, 0);
+    format.setVersion(3, 2);
     format.setOption(QSurfaceFormat::DeprecatedFunctions, false);
     format.setProfile(QSurfaceFormat::CoreProfile);
     //format.setSamples(4);  // Uncomment for nice antialiasing. Not always supported.

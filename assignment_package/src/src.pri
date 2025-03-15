@@ -2,44 +2,43 @@ INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD
 
 SOURCES += \
-    $$PWD/framebuffer.cpp \
     $$PWD/main.cpp \
     $$PWD/mainwindow.cpp \
     $$PWD/mygl.cpp \
-    $$PWD/quad.cpp \
-    $$PWD/scene/chunkworkers.cpp \
+    $$PWD/scene/face.cpp \
+    $$PWD/scene/facedisplay.cpp \
+    $$PWD/scene/halfedge.cpp \
+    $$PWD/scene/halfedgedisplay.cpp \
+    $$PWD/scene/joint.cpp \
+    $$PWD/scene/mesh.cpp \
+    $$PWD/scene/vertex.cpp \
+    $$PWD/scene/vertexdisplay.cpp \
     $$PWD/shaderprogram.cpp \
+    $$PWD/utils.cpp \
+    $$PWD/la.cpp \
     $$PWD/drawable.cpp \
+    $$PWD/camera.cpp \
     $$PWD/cameracontrolshelp.cpp \
-    $$PWD/scene/cube.cpp \
     $$PWD/openglcontext.cpp \
-    $$PWD/scene/terrain.cpp \
-    $$PWD/scene/worldaxes.cpp \
-    $$PWD/scene/entity.cpp \
-    $$PWD/scene/player.cpp \
-    $$PWD/scene/camera.cpp \
-    $$PWD/playerinfo.cpp \
-    $$PWD/scene/chunk.cpp \
-    $$PWD/texture.cpp
+    $$PWD/scene/squareplane.cpp
 
 HEADERS += \
-    $$PWD/framebuffer.h \
+    $$PWD/la.h \
     $$PWD/mainwindow.h \
     $$PWD/mygl.h \
-    $$PWD/quad.h \
-    $$PWD/scene/chunkworkers.h \
+    $$PWD/scene/face.h \
+    $$PWD/scene/facedisplay.h \
+    $$PWD/scene/halfedge.h \
+    $$PWD/scene/halfedgedisplay.h \
+    $$PWD/scene/joint.h \
+    $$PWD/scene/mesh.h \
+    $$PWD/scene/vertex.h \
+    $$PWD/scene/vertexdisplay.h \
     $$PWD/shaderprogram.h \
+    $$PWD/utils.h \
     $$PWD/drawable.h \
+    $$PWD/camera.h \
     $$PWD/cameracontrolshelp.h \
-    $$PWD/scene/cube.h \
     $$PWD/openglcontext.h \
-    $$PWD/scene/terrain.h \
-    $$PWD/scene/worldaxes.h \
-    $$PWD/smartpointerhelp.h \
-    $$PWD/glm_includes.h \
-    $$PWD/scene/entity.h \
-    $$PWD/scene/player.h \
-    $$PWD/scene/camera.h \
-    $$PWD/playerinfo.h \
-    $$PWD/scene/chunk.h \
-    $$PWD/texture.h
+    $$PWD/scene/squareplane.h\
+    $$PWD/smartpointerhelp.h
