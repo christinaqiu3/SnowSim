@@ -1,0 +1,20 @@
+Aaron implemented the procedural terrain generation
+    I borrowed a bunch of noise functions from the terrain visualizer and LERPed between two different
+    ones to transition between biomes. I also made a worleyCells function for later that colors each
+    point the noise of its closest point to get a cell look.
+Christina implemented the tick function and the player physics and the block placement/destroying
+    Some challenges were that I got stuck in the blocks but this was fixed with an offset.
+    Additionally, my isOnGround wasn't working but this was fixed with a snapping function to
+    snap the position to the ground.
+Lewis implemented the efficient rendering chunkloading
+    For each chunk, to check if a block face should be drawn or not, I reused the set of face normals
+    to get the adjacent block and check if it was EMPTY or not. Additionally, if a block was at the
+    edge of the chunk, it would jump over to the next chunk to get the block. To draw the faces, I had a
+    mapping of directions to an array of four points which made up the positions of a unit cube at 0,0,0.
+    These positions were then multiplied by a translation matrix based on the position of the chunk and
+    the position of the block in that chunk. All VBO data was pushed in the same interleaved format
+    (pos, nor, col), whcih got spereated out in the new draw function.
+
+Help log
+No additional help need for me, Aaron
+or me, Christina
