@@ -14,6 +14,9 @@
 #include <QFileDialog>
 #include <QColorDialog>
 
+#include "MPMSolver.h"
+#include <QDebug>
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -124,6 +127,18 @@ void MainWindow::on_chooseOBJ_clicked()
     file.close();
     //call a helper in mygl, give it the file name, then that calls the tinyobj in mesh, populate data
 
+}
+
+void MainWindow::on_MPM_clicked(){
+    MPMSolver solver(10, 10, 1.0f);
+    solver.addParticle(MPMParticle(QVector2D(2.0f, 5.0f), QVector2D(0.0f, 0.0f), 1.0f));
+
+    for (int step = 0; step < 100; ++step) {
+        solver.computeForcesAndIntegrate();
+    }
+
+    qDebug() << "Simulation complete.";
+    return 0;
 }
 
 void MainWindow::on_loadJSON_clicked() {

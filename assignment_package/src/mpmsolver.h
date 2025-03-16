@@ -28,6 +28,8 @@ private:
     QVector2D computeCohesion(const MPMParticle& p);
     void integrate(MPMParticle& p, QVector2D force);
 
+    void particleToGridTransfer();
+
 };
 
 #endif // MPMSOLVER_H

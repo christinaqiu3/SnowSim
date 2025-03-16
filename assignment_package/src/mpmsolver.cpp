@@ -45,3 +45,7 @@ void MPMSolver::integrate(MPMParticle& p, QVector2D force) {
     p.velocity += acceleration * dt;
     p.position += p.velocity * dt;
 }
+
+void MPMSolver::particleToGridTransfer() {
+    //TODO FIZZY
+}
