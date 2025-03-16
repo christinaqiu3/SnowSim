@@ -55,6 +55,8 @@ public slots:
     void on_jointRotZMinus_clicked();
     void on_meshSkinning_clicked();
 
+    void on_MPM_clicked();
+
 
     std::unordered_map<halfedge*, vertex*> smoothEdgeMidpoints(std::unordered_map<face*, vertex*> faceCentroids, int numOrigHalfEdges);
     void smoothOriginalVertices(std::unordered_map<face*, vertex*> faceCentroids, int numOrigVerts);

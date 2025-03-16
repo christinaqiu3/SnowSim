@@ -4,6 +4,8 @@ DEPENDPATH += $$PWD
 SOURCES += \
     $$PWD/main.cpp \
     $$PWD/mainwindow.cpp \
+    $$PWD/mpmparticle.cpp \
+    $$PWD/mpmsolver.cpp \
     $$PWD/mygl.cpp \
     $$PWD/scene/face.cpp \
     $$PWD/scene/facedisplay.cpp \
@@ -25,6 +27,8 @@ SOURCES += \
 HEADERS += \
     $$PWD/la.h \
     $$PWD/mainwindow.h \
+    $$PWD/mpmparticle.h \
+    $$PWD/mpmsolver.h \
     $$PWD/mygl.h \
     $$PWD/scene/face.h \
     $$PWD/scene/facedisplay.h \
