@@ -139,6 +139,20 @@ void MyGL::paintGL()
 
     glEnable(GL_DEPTH_TEST);
 
+
+    //MPM STUFF
+    updateSimulation(); // Update physics
+
+    std::vector<QVector4D> particlePositions;
+    for (const auto& p : solver.getParticles()) {
+        particlePositions.push_back(QVector4D(p.position.x(), p.position.y(), 0.0f, 1.0f));
+    }
+
+    particleDrawable->updateParticles(particlePositions); // Update OpenGL buffer
+
+    particleDrawable->create();
+    m_progFlat.draw(*particleDrawable);
+
 }
 
 void MyGL::helperDraw(Joint* joint) {
@@ -153,6 +167,19 @@ void MyGL::on_loadButton_clicked() {
         m_mesh.create();
         update();
     }
+}
+
+void MyGL::initializeMPM() {
+    solver = MPMSolver(10, 10, 1.0f);  // Reset simulation
+    solver.addParticle(MPMParticle(QVector2D(2.0f, 5.0f), QVector2D(0.0f, 0.0f), 1.0f));
+
+    if (!particleDrawable) {
+        particleDrawable = new ParticleDrawable(this);
+    }
+}
+
+void MyGL::updateSimulation() {
+    solver.computeForcesAndIntegrate(); // Step simulation forward
 }
 
 //void MyGL::on_loadButton2_clicked(QTreeWidget* j) {

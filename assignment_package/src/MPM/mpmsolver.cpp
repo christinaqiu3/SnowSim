@@ -49,3 +49,8 @@ void MPMSolver::integrate(MPMParticle& p, QVector2D force) {
 void MPMSolver::particleToGridTransfer() {
     //TODO FIZZY
 }
+
+const QVector<MPMParticle>& MPMSolver::getParticles() const {
+    return particles;
+}
+

@@ -32,10 +32,16 @@ private:
 
     Camera m_glCamera;
 
+    MPMSolver solver;
+    ParticleDrawable* particleDrawable;
+
 
 public:
     explicit MyGL(QWidget *parent = nullptr);
     ~MyGL();
+
+    void initializeMPM(); // Function to start MPM simulation
+    void updateSimulation(); // Called each frame
 
     void initializeGL();
     void resizeGL(int w, int h);

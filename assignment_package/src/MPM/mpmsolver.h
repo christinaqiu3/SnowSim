@@ -18,6 +18,8 @@ public:
     void addParticle(const MPMParticle& particle);
     void computeForcesAndIntegrate();
 
+    const QVector<MPMParticle>& getParticles() const;
+
 private:
     QVector<MPMParticle> particles;
     QVector<QVector<GridNode>> grid;
