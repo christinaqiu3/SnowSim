@@ -6,9 +6,6 @@
 #include <QMainWindow>
 #include <QTreeWidget>
 
-#include "MPM/particledrawable.h"
-#include "MPM/mpmsolver.h"
-
 
 namespace Ui {
 class MainWindow;

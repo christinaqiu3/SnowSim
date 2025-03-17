@@ -16,6 +16,7 @@
 
 MyGL::MyGL(QWidget *parent)
     : OpenGLContext(parent),
+    solver(10, 10, 1.0f),
       m_geomSquare(this),
     m_progLambert(this), m_progFlat(this), m_prog_skeleton(this),
     m_glCamera(), m_mesh(this),
