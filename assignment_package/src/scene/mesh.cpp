@@ -43,7 +43,7 @@ void mesh::create() {
         } while (currentEdge != face->getIncidentHalfEdge());
 
 
-       helperTriangulate(indices, icount, totalV);
+        helperTriangulate(indices, icount, totalV);
         totalV += verts;
 
     }

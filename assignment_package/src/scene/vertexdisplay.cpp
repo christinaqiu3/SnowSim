@@ -24,7 +24,8 @@ void vertexdisplay::create() {
 
 void vertexdisplay::updateVertex(vertex* vertex) {
     representedVertex = vertex;
-    std::cout << vertex->jointInfluences[0].first->getName().toStdString() << std::endl;
+    // Commented by fizzy : 3/20/25 : throwing error
+    //std::cout << vertex->jointInfluences[0].first->getName().toStdString() << std::endl;
     create();
 }
 

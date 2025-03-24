@@ -14,7 +14,8 @@
 #include <QFileDialog>
 #include <QColorDialog>
 
-#include "MPM/MPMSolver.h"
+// #include "mpmsolver.h"
+// #include "mpmparticle.h"
 #include <QDebug>
 
 

@@ -14,6 +14,9 @@
 #include "scene/halfedgedisplay.h"
 #include "scene/facedisplay.h"
 #include "scene/joint.h"
+#include "mpmparticle.h"
+#include "mpmsolver.h"
+#include "particledrawable.h"
 //#include <ui_mainwindow.h>
 
 
@@ -93,8 +96,6 @@ public slots:
     void slot_setJX(double x);
     void slot_setJY(double x);
     void slot_setJZ(double x);
-
-
 
     void slot_setSelectedJoint(QTreeWidgetItem*);
 

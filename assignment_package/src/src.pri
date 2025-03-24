@@ -2,11 +2,9 @@ INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD
 
 SOURCES += \
-    $$PWD/MPM/mpmparticle.cpp \
-    $$PWD/MPM/mpmsolver.cpp \
-    $$PWD/MPM/particledrawable.cpp \
     $$PWD/main.cpp \
     $$PWD/mainwindow.cpp \
+    $$PWD/mpmgrid.cpp \
     $$PWD/mpmparticle.cpp \
     $$PWD/mpmsolver.cpp \
     $$PWD/mygl.cpp \
@@ -29,11 +27,9 @@ SOURCES += \
     $$PWD/scene/squareplane.cpp
 
 HEADERS += \
-    $$PWD/MPM/mpmparticle.h \
-    $$PWD/MPM/mpmsolver.h \
-    $$PWD/MPM/particledrawable.h \
     $$PWD/la.h \
     $$PWD/mainwindow.h \
+    $$PWD/mpmgrid.h \
     $$PWD/mpmparticle.h \
     $$PWD/mpmsolver.h \
     $$PWD/mygl.h \

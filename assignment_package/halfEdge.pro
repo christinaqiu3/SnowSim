@@ -56,11 +56,6 @@ address_sanitizer {
     QMAKE_LFLAGS += -fsanitize=address
 }
 
-HEADERS += \
-src/MPM/mpmparticle.h \
-src/MPM/mpmsolver.h
+HEADERS +=
 
-SOURCES += \
-src/MPM/mpmparticle.cpp \
-src/MPM/mpmsolver.cpp \
-src/mygl.cpp
+SOURCES +=

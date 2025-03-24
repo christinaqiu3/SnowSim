@@ -16,15 +16,16 @@
 
 MyGL::MyGL(QWidget *parent)
     : OpenGLContext(parent),
-    solver(10, 10, 1.0f),
       m_geomSquare(this),
     m_progLambert(this), m_progFlat(this), m_prog_skeleton(this),
     m_glCamera(), m_mesh(this),
+    solver(QVector3D(5.0, 5.0, 5.0), 1.0, QVector3D(0.0f, 0.0f, 0.0f)),
     m_joint(nullptr), m_vertDisplay(this), m_halfedgeDisplay(this),
     m_faceDisplay(this),
     vx(0), vy(0), vz(0),
     jx(0), jy(0), jz(0),
     rx(0), ry(0), rz(0)
+
 {
     setFocusPolicy(Qt::StrongFocus);
 }
@@ -107,48 +108,74 @@ void MyGL::paintGL()
     m_progLambert.setCamPos(glm::vec3(m_glCamera.eye));
     m_progFlat.setModelMatrix(glm::mat4(1.f));
 
-    m_prog_skeleton.setViewProjMatrix(m_glCamera.getViewProj());
-    m_prog_skeleton.setModelMatrix(glm::mat4(1.f));//does model matriux need overall transform?
+    // m_prog_skeleton.setViewProjMatrix(m_glCamera.getViewProj());
+    // m_prog_skeleton.setModelMatrix(glm::mat4(1.f));//does model matriux need overall transform?
 
-    if(m_mesh.elemCount() > 0) {
-        m_progFlat.draw(m_mesh);
-    }
 
 //    if(m_joint->elemCount() > 0) {
 //        m_prog_skeleton.draw(*m_joint);
 //    }
 
+    // THIS DRAWS THE LOADED OBJ
+    // if(m_mesh.elemCount() > 0) {
+    //     m_progFlat.draw(m_mesh);
+    // }
+
+
     //start doing the selected drawing parts
     glDisable(GL_DEPTH_TEST);
 
-    if (m_vertDisplay.getVertex() != nullptr) {
-    m_vertDisplay.create();
-    m_progFlat.draw(m_vertDisplay);
-    }
-    if (m_faceDisplay.getFace() != nullptr) {
-    m_faceDisplay.create();
-    m_progFlat.draw(m_faceDisplay);
-    }
-    if (m_halfedgeDisplay.getHalfEdge() != nullptr) {
-    m_halfedgeDisplay.create();
-    m_progFlat.draw(m_halfedgeDisplay);
-    }
+    // THESE DRAW THE SELECTED PIECE
 
-    if(m_joint && m_joint->children.size() > 0){
-        helperDraw(m_joint.get());
+    // if (m_vertDisplay.getVertex() != nullptr) {
+    //     m_vertDisplay.create();
+    //     m_progFlat.draw(m_vertDisplay);
+    // }
+
+    // if (m_faceDisplay.getFace() != nullptr) {
+    // m_faceDisplay.create();
+    // m_progFlat.draw(m_faceDisplay);
+    // }
+    // if (m_halfedgeDisplay.getHalfEdge() != nullptr) {
+    // m_halfedgeDisplay.create();
+    // m_progFlat.draw(m_halfedgeDisplay);
+    // }
+
+    // if(m_joint && m_joint->children.size() > 0){
+    //     helperDraw(m_joint.get());
+    // }
+
+    //glEnable(GL_DEPTH_TEST);
+    // PARTICLE RENDER TEST:
+    std::vector<QVector4D> particlePositions;
+    float spacing = 0.2f;
+    glm::vec3 dim = glm::vec3(8, 8,  8);
+    glm::vec3 origin = glm::vec3(float(dim.x), float(dim.y), float(dim.z));
+    origin *= spacing * -0.5;
+    for (int i = 0; i < dim.x; ++i)
+    {
+        for (int j = 0; j < dim.y; ++j)
+        {
+            for (int k = 0; k < dim.z; ++k)
+            {
+                float x = origin.x + i * spacing;
+                float y = origin.y + j * spacing;
+                float z = origin.z + k * spacing;
+                // Store as a 4D vector with w=1.0f
+                particlePositions.emplace_back(x, y, z, 1.0f);
+            }
+        }
     }
-
-    glEnable(GL_DEPTH_TEST);
-
 
     //MPM STUFF
-    updateSimulation(); // Update physics
+    //updateSimulation(); // Update physics
 
-    std::vector<QVector4D> particlePositions;
-    for (const auto& p : solver.getParticles()) {
-        particlePositions.push_back(QVector4D(p.position.x(), p.position.y(), 0.0f, 1.0f));
-    }
+    // for (const auto& p : solver.getParticles()) {
+    //     particlePositions.push_back(QVector4D(p.position.x(), p.position.y(), 0.0f, 1.0f));
+    // }
 
+    initializeMPM();
+    //std::cout << "Size1 = " << particlePositions.size() << std::endl;
     particleDrawable->updateParticles(particlePositions); // Update OpenGL buffer
 
     particleDrawable->create();
@@ -170,18 +197,22 @@ void MyGL::on_loadButton_clicked() {
     }
 }
 
-void MyGL::initializeMPM() {
-    solver = MPMSolver(10, 10, 1.0f);  // Reset simulation
-    solver.addParticle(MPMParticle(QVector2D(2.0f, 5.0f), QVector2D(0.0f, 0.0f), 1.0f));
 
-    if (!particleDrawable) {
+void MyGL::initializeMPM() {
+    solver = MPMSolver(QVector3D(5.0, 5.0, 5.0), 1.0, QVector3D(0.0f, 0.0f, 0.0f));  // Reset simulation
+    solver.addParticle(MPMParticle(QVector3D(2.0f, 5.0f, 2.0f), QVector3D(0.0f, 0.0f, 0.0f), 1.0f));
+
+    //if (!particleDrawable) {
         particleDrawable = new ParticleDrawable(this);
-    }
+    //}
 }
 
 void MyGL::updateSimulation() {
     solver.computeForcesAndIntegrate(); // Step simulation forward
 }
+
+
+// *FIZZY* Idk what this stuff is but I think it was already commented out
 
 //void MyGL::on_loadButton2_clicked(QTreeWidget* j) {
 
