@@ -3,7 +3,7 @@
 
 
 ParticleDrawable::ParticleDrawable(OpenGLContext* context)
-    : Drawable(context), positions(std::vector<QVector4D>()) {}
+    : Drawable(context), positions(std::vector<glm::vec4>()) {}
 
 void ParticleDrawable::create() {
     count = positions.size(); // Number of particles
@@ -24,7 +24,7 @@ void ParticleDrawable::create() {
                              positions.data(), GL_DYNAMIC_DRAW);
 }
 
-void ParticleDrawable::updateParticles(const std::vector<QVector4D>& newPositions) {
+void ParticleDrawable::updateParticles(const std::vector<glm::vec4>& newPositions) {
     positions = newPositions;
     std::cout << "Size2 = " << positions.size() << std::endl;
     create();

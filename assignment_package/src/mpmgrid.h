@@ -5,11 +5,13 @@
 #include <la.h>
 #include <QVector4D>
 #include <QVector3D>
+#include <glm/glm.hpp>
 
 struct GridNode {
-    QVector3D velocity;
+    glm::vec3 velocity;
     float mass;
     float density;
+    glm::vec3 force;
     GridNode();
 };
 
@@ -19,10 +21,10 @@ private:
 
 public:
     mpmgrid();
-    mpmgrid(QVector3D dim, float spacing, QVector3D center);
-    QVector3D dimention;
+    mpmgrid(glm::vec3 dim, float spacing, glm::vec3 center);
+    glm::vec3 dimension;
     float spacing;
-    QVector3D center;
+    glm::vec3 center;
     std::vector<GridNode> gridNodes;
 
     // NUMBER OF CELLS IN EACH DIM

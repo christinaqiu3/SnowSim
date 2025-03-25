@@ -1,15 +1,27 @@
 #pragma once
-#include <QVector2D>
+#include <QVector3D>
+#include <QMatrix3x3>
+#include <glm/glm.hpp>
 
 class MPMParticle
 {
 public:
-    QVector3D position;
-    QVector3D velocity;
+    glm::vec3 position;
+    glm::vec3 velocity;
     float mass;
     float density;
     float volume;
 
-    MPMParticle(QVector3D pos, QVector3D vel, float m);
+    glm::mat3 FE;
+    glm::mat3 FP;
+    glm::mat3 sigma;
+
+    MPMParticle(glm::vec3 pos, glm::vec3 vel, float m);
+
+    void computeFE();
+    void computeFP();
+    void computeSigma();
 };
+
+
 

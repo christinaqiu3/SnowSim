@@ -19,7 +19,7 @@ MyGL::MyGL(QWidget *parent)
       m_geomSquare(this),
     m_progLambert(this), m_progFlat(this), m_prog_skeleton(this),
     m_glCamera(), m_mesh(this),
-    solver(QVector3D(5.0, 5.0, 5.0), 1.0, QVector3D(0.0f, 0.0f, 0.0f)),
+    solver(glm::vec3(5.0, 5.0, 5.0), 1.0, glm::vec3(0.0f, 0.0f, 0.0f), 0.5f),
     m_joint(nullptr), m_vertDisplay(this), m_halfedgeDisplay(this),
     m_faceDisplay(this),
     vx(0), vy(0), vz(0),
@@ -147,25 +147,25 @@ void MyGL::paintGL()
 
     //glEnable(GL_DEPTH_TEST);
     // PARTICLE RENDER TEST:
-    std::vector<QVector4D> particlePositions;
-    float spacing = 0.2f;
-    glm::vec3 dim = glm::vec3(8, 8,  8);
-    glm::vec3 origin = glm::vec3(float(dim.x), float(dim.y), float(dim.z));
-    origin *= spacing * -0.5;
-    for (int i = 0; i < dim.x; ++i)
-    {
-        for (int j = 0; j < dim.y; ++j)
-        {
-            for (int k = 0; k < dim.z; ++k)
-            {
-                float x = origin.x + i * spacing;
-                float y = origin.y + j * spacing;
-                float z = origin.z + k * spacing;
-                // Store as a 4D vector with w=1.0f
-                particlePositions.emplace_back(x, y, z, 1.0f);
-            }
-        }
-    }
+    // std::vector<QVector4D> particlePositions;
+    // float spacing = 0.2f;
+    // glm::vec3 dim = glm::vec3(8, 8,  8);
+    // glm::vec3 origin = glm::vec3(float(dim.x), float(dim.y), float(dim.z));
+    // origin *= spacing * -0.5;
+    // for (int i = 0; i < dim.x; ++i)
+    // {
+    //     for (int j = 0; j < dim.y; ++j)
+    //     {
+    //         for (int k = 0; k < dim.z; ++k)
+    //         {
+    //             float x = origin.x + i * spacing;
+    //             float y = origin.y + j * spacing;
+    //             float z = origin.z + k * spacing;
+    //             // Store as a 4D vector with w=1.0f
+    //             particlePositions.emplace_back(x, y, z, 1.0f);
+    //         }
+    //     }
+    // }
 
     //MPM STUFF
     //updateSimulation(); // Update physics
@@ -176,6 +176,10 @@ void MyGL::paintGL()
 
     initializeMPM();
     //std::cout << "Size1 = " << particlePositions.size() << std::endl;
+    std::vector<glm::vec4> particlePositions;
+    for (int i = 0; i<solver.getParticles().size(); i++) {
+        particlePositions.emplace_back(solver.getParticles()[i].position, 1.0f);
+    }
     particleDrawable->updateParticles(particlePositions); // Update OpenGL buffer
 
     particleDrawable->create();
@@ -199,9 +203,30 @@ void MyGL::on_loadButton_clicked() {
 
 
 void MyGL::initializeMPM() {
-    solver = MPMSolver(QVector3D(5.0, 5.0, 5.0), 1.0, QVector3D(0.0f, 0.0f, 0.0f));  // Reset simulation
-    solver.addParticle(MPMParticle(QVector3D(2.0f, 5.0f, 2.0f), QVector3D(0.0f, 0.0f, 0.0f), 1.0f));
+    solver = MPMSolver(glm::vec3(5.0, 5.0, 5.0), 1.0, glm::vec3(0.0f, 0.0f, 0.0f), 1.f);  // Reset simulation
 
+    std::vector<QVector4D> particlePositions;
+    float spacing = 0.2f;
+    glm::vec3 dim = glm::vec3(8, 8,  8);
+    glm::vec3 origin = glm::vec3(float(dim.x), float(dim.y), float(dim.z));
+    origin *= spacing * -0.5;
+    for (int i = 0; i < dim.x; ++i)
+    {
+        for (int j = 0; j < dim.y; ++j)
+        {
+            for (int k = 0; k < dim.z; ++k)
+            {
+                float x = origin.x + i * spacing;
+                float y = origin.y + j * spacing;
+                float z = origin.z + k * spacing;
+                // Store as a 4D vector with w=1.0f
+                //particlePositions.emplace_back(x, y, z, 1.0f);
+
+                solver.addParticle(MPMParticle(glm::vec3(x, y, z), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f));
+
+            }
+        }
+    }
     //if (!particleDrawable) {
         particleDrawable = new ParticleDrawable(this);
     //}

@@ -2,24 +2,24 @@
 #include <cmath>
 
 GridNode::GridNode()
-    : velocity(0.f, 0.f, 0.f), mass(0.f), density(0.f)
+    : velocity(0.f, 0.f, 0.f), mass(0.f), density(0.f), force(0.f, 0.f, 0.f)
 {}
 
 mpmgrid::mpmgrid()
-    : dimention(QVector3D(3.0f, 3.0f, 3.0f)),
+    : dimension(glm::vec3(3.0f, 3.0f, 3.0f)),
     spacing(1.f),
-    center(QVector3D(0.f, 0.f, 0.f))
+    center(glm::vec3(0.f, 0.f, 0.f))
 {}
 
 
-mpmgrid::mpmgrid(QVector3D dim, float spc, QVector3D cent)
-    : dimention(dim),
+mpmgrid::mpmgrid(glm::vec3 dim, float spc, glm::vec3 cent)
+    : dimension(dim),
     spacing(spc),
     center(cent)
 {
-    nx = static_cast<int>(std::floor(dimention.x() / spacing));
-    ny = static_cast<int>(std::floor(dimention.y() / spacing));
-    nz = static_cast<int>(std::floor(dimention.z() / spacing));
+    nx = static_cast<int>(std::floor(dimension.x / spacing));
+    ny = static_cast<int>(std::floor(dimension.y / spacing));
+    nz = static_cast<int>(std::floor(dimension.z / spacing));
 
     if(nx < 1) nx = 1;
     if(ny < 1) ny = 1;
@@ -31,9 +31,9 @@ mpmgrid::mpmgrid(QVector3D dim, float spc, QVector3D cent)
 
 GridNode* mpmgrid::getGridNode(float x, float y, float z)
 {
-    float xMin = center.x() - 0.5f * dimention.x();
-    float yMin = center.y() - 0.5f * dimention.y();
-    float zMin = center.z() - 0.5f * dimention.z();
+    float xMin = center.x - 0.5f * dimension.x;
+    float yMin = center.y - 0.5f * dimension.y;
+    float zMin = center.z - 0.5f * dimension.z;
 
     int i = static_cast<int>(std::floor((x - xMin) / spacing));
     int j = static_cast<int>(std::floor((y - yMin) / spacing));
@@ -55,7 +55,7 @@ void mpmgrid::clearGrid() {
     // CLEAR GRID FOR NEW VALUES
     for (GridNode& node : gridNodes) {
         node.mass = 0.0f;
-        node.velocity = QVector3D(0.f, 0.f, 0.f);
+        node.velocity = glm::vec3(0.f, 0.f, 0.f);
     }
 }
 
@@ -69,5 +69,9 @@ void mpmgrid::divideMass() {
             n.velocity /= n.mass;
         }
     }
+
+
 }
+
+
 
