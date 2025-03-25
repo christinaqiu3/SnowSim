@@ -70,6 +70,7 @@ void MPMSolver::particleToGridTransfer() {
         int j = static_cast<int>(std::floor((y - yMin) / grid.spacing ));
         int k = static_cast<int>(std::floor((z - zMin) / grid.spacing ));
 
+
         // YOU NEED TO DO THIS FOR ALL CELLS WITHIN SOME RADIUS
         for(int di = -2; di < 2; di++) {
             for(int dj = -2; dj < 2; dj++) {
@@ -117,9 +118,68 @@ const QVector<MPMParticle>& MPMSolver::getParticles() const {
     return particles;
 }
 
-void MPMSolver::computeInitialDensity() {
-    for (MPMParticle& p : particles) {
 
+// THIS SHOULD ONLY BE CALLED ONCE AT t=0
+void MPMSolver::computeInitialDensity() {
+    float xMin = grid.center.x() - 0.5f * grid.dimention.x();
+    float yMin = grid.center.y() - 0.5f * grid.dimention.y();
+    float zMin = grid.center.z() - 0.5f * grid.dimention.z();
+
+    // COMPUTE GRID DENSITY
+    float volume = grid.spacing * grid.spacing * grid.spacing;
+    for (GridNode& g : grid.gridNodes) {
+        g.density = (g.mass / volume);
+    }
+
+    // TRANSFER GRID DENSITY TO PARTICLES
+    for (MPMParticle& p : particles) {
+        // World space positions
+        float x = p.position[0];
+        float y = p.position[1];
+        float z = p.position[2];
+
+        int i = static_cast<int>(std::floor((x - xMin) / grid.spacing ));
+        int j = static_cast<int>(std::floor((y - yMin) / grid.spacing ));
+        int k = static_cast<int>(std::floor((z - zMin) / grid.spacing ));
+
+
+        // YOU NEED TO DO THIS FOR ALL CELLS WITHIN SOME RADIUS
+        for(int di = -2; di < 2; di++) {
+            for(int dj = -2; dj < 2; dj++) {
+                for(int dk = -2; dk < 2; dk++) {
+                    // INDEX OF CURRENT NODE WE ARE LOOKING AT
+                    int iNode = i + di;
+                    int jNode = j + dj;
+                    int kNode = k + dk;
+
+                    // CLAM TO BE INSIDE THE GRID DOMAIN
+                    if(iNode < 0 || iNode >= grid.nx) continue;
+                    if(jNode < 0 || jNode >= grid.ny) continue;
+                    if(kNode < 0 || kNode >= grid.nz) continue;
+
+                    // CENTER POSITION OF CUR NODE IN WORLD SPACE
+                    float xNode = float(xMin) + (iNode + 0.5f)*grid.spacing;
+                    float yNode = float(yMin) + (jNode + 0.5f)*grid.spacing;
+                    float zNode = float(zMin) + (kNode + 0.5f)*grid.spacing;
+
+                    // POSITION IN GRID SPACE
+                    float xGrid = (x - xNode)/grid.spacing;
+                    float yGrid = (y - yNode)/grid.spacing;
+                    float zGrid = (z - zNode)/grid.spacing;
+
+                    // WEIGHT OF GRID CELL RELATICE TO PARTICLE GRID
+                    float weight = cubicSpline1D(xGrid) * cubicSpline1D(yGrid) * cubicSpline1D(zGrid);
+                    if (weight == 0.0) continue;
+
+                    // SUM UP DENSITY CONTRIBUTIONS
+                    GridNode* curNode = grid.getGridNode(x+(grid.spacing*di), y+(grid.spacing*dj), z+(grid.spacing*di));
+                    p.density += curNode->density * weight;
+                }
+            }
+        }
+
+        // DIVIDE TO GET INITIAL VOLUME OF EACH PARTICLE
+        p.volume = p.mass / p.density;
     }
 }
 
