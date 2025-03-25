@@ -219,9 +219,6 @@ void MyGL::initializeMPM() {
                 float x = origin.x + i * spacing;
                 float y = origin.y + j * spacing;
                 float z = origin.z + k * spacing;
-                // Store as a 4D vector with w=1.0f
-                //particlePositions.emplace_back(x, y, z, 1.0f);
-
                 solver.addParticle(MPMParticle(glm::vec3(x, y, z), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f));
 
             }

@@ -6,7 +6,7 @@ const float gravity = -9.81f; // Gravity acceleration
 const float cohesionStrength = 0.1f; // Cohesion force factor
 
 MPMSolver::MPMSolver(glm::vec3 gridDim, float spacing, glm::vec3 gridOrigin, float dt)
-    : grid(glm::vec3(gridDim), spacing, glm::vec3(gridOrigin)), stepSize(dt) {}
+    : stepSize(dt), grid(glm::vec3(gridDim), spacing, glm::vec3(gridOrigin)) {}
 
 void MPMSolver::addParticle(const MPMParticle& particle) {
     particles.append(particle);
@@ -82,7 +82,6 @@ void MPMSolver::particleToGridTransfer() {
         int j = static_cast<int>(std::floor((y - yMin) / grid.spacing ));
         int k = static_cast<int>(std::floor((z - zMin) / grid.spacing ));
 
-
         // YOU NEED TO DO THIS FOR ALL CELLS WITHIN SOME RADIUS
         for(int di = -2; di < 2; di++) {
             for(int dj = -2; dj < 2; dj++) {
@@ -92,29 +91,27 @@ void MPMSolver::particleToGridTransfer() {
                     int jNode = j + dj;
                     int kNode = k + dk;
 
-                    // CLAM TO BE INSIDE THE GRID DOMAIN
+                    // CLAMP TO BE INSIDE THE GRID DOMAIN
                     if(iNode < 0 || iNode >= grid.nx) continue;
                     if(jNode < 0 || jNode >= grid.ny) continue;
                     if(kNode < 0 || kNode >= grid.nz) continue;
 
-                    // CENTER POSITION OF CUR NODE IN WORLD SPACE
-                    float xNode = float(xMin) + (iNode + 0.5f)*grid.spacing;
-                    float yNode = float(yMin) + (jNode + 0.5f)*grid.spacing;
-                    float zNode = float(zMin) + (kNode + 0.5f)*grid.spacing;
+
+                    int idx = iNode + grid.nx*(jNode + grid.ny*kNode);
+                    GridNode &curNode = grid.gridNodes[idx];
 
                     // POSITION IN GRID SPACE
-                    float xGrid = (x - xNode)/grid.spacing;
-                    float yGrid = (y - yNode)/grid.spacing;
-                    float zGrid = (z - zNode)/grid.spacing;
+                    float xGrid = (x - curNode.worldPos.x)/grid.spacing;
+                    float yGrid = (y - curNode.worldPos.y)/grid.spacing;
+                    float zGrid = (z - curNode.worldPos.z)/grid.spacing;
 
                     // WEIGHT OF GRID CELL RELATICE TO PARTICLE GRID
                     float weight = weightFun(xGrid) * weightFun(yGrid) * weightFun(zGrid);
                     if (weight == 0.0) continue;
 
-                    // CURRENT NODE WE ARE LOOKING AT
-                    GridNode* curNode = grid.getGridNode(x+(grid.spacing*di), y+(grid.spacing*dj), z+(grid.spacing*di));
-                    curNode->mass += p.mass * weight;
-                    curNode->velocity += p.velocity * p.mass * weight;
+                    // UPDATE CURRENT NODE WE ARE LOOKING AT
+                    curNode.mass += p.mass * weight;
+                    curNode.velocity += p.velocity * p.mass * weight;
                 }
             }
         }
@@ -168,23 +165,20 @@ void MPMSolver::computeInitialDensity() {
                     if(jNode < 0 || jNode >= grid.ny) continue;
                     if(kNode < 0 || kNode >= grid.nz) continue;
 
-                    // CENTER POSITION OF CUR NODE IN WORLD SPACE
-                    float xNode = float(xMin) + (iNode + 0.5f)*grid.spacing;
-                    float yNode = float(yMin) + (jNode + 0.5f)*grid.spacing;
-                    float zNode = float(zMin) + (kNode + 0.5f)*grid.spacing;
+                    int idx = iNode + grid.nx*(jNode + grid.ny*kNode);
+                    GridNode &curNode = grid.gridNodes[idx];
 
                     // POSITION IN GRID SPACE
-                    float xGrid = (x - xNode)/grid.spacing;
-                    float yGrid = (y - yNode)/grid.spacing;
-                    float zGrid = (z - zNode)/grid.spacing;
+                    float xGrid = (x - curNode.worldPos.x)/grid.spacing;
+                    float yGrid = (y - curNode.worldPos.y)/grid.spacing;
+                    float zGrid = (z - curNode.worldPos.z)/grid.spacing;
 
                     // WEIGHT OF GRID CELL RELATICE TO PARTICLE GRID
                     float weight = weightFun(xGrid) * weightFun(yGrid) * weightFun(zGrid);
                     if (weight == 0.0) continue;
 
                     // SUM UP DENSITY CONTRIBUTIONS
-                    GridNode* curNode = grid.getGridNode(x+(grid.spacing*di), y+(grid.spacing*dj), z+(grid.spacing*di));
-                    p.density += curNode->density * weight;
+                    p.density += curNode.density * weight;
                 }
             }
         }
@@ -229,38 +223,53 @@ void MPMSolver::computeForce() {
                     if(jNode < 0 || jNode >= grid.ny) continue;
                     if(kNode < 0 || kNode >= grid.nz) continue;
 
-                    // CENTER POSITION OF CUR NODE IN WORLD SPACE
-                    float xNode = float(xMin) + (iNode + 0.5f)*grid.spacing;
-                    float yNode = float(yMin) + (jNode + 0.5f)*grid.spacing;
-                    float zNode = float(zMin) + (kNode + 0.5f)*grid.spacing;
+                    int idx = iNode + grid.nx*(jNode + grid.ny*kNode);
+                    GridNode &curNode = grid.gridNodes[idx];
 
                     // POSITION IN GRID SPACE
-                    float xGrid = (x - xNode)/grid.spacing;
-                    float yGrid = (y - yNode)/grid.spacing;
-                    float zGrid = (z - zNode)/grid.spacing;
+                    float xGrid = (x - curNode.worldPos.x)/grid.spacing;
+                    float yGrid = (y - curNode.worldPos.y)/grid.spacing;
+                    float zGrid = (z - curNode.worldPos.z)/grid.spacing;
 
                     glm::vec3 gradWeight;
                     gradWeight[0] = 1.f / grid.spacing * weightFunGradient(xGrid) * weightFun(yGrid) * weightFun(zGrid);
                     gradWeight[1] = 1.f / grid.spacing * weightFun(xGrid) * weightFunGradient(yGrid) * weightFun(zGrid);
                     gradWeight[2] = 1.f / grid.spacing * weightFun(xGrid) * weightFun(yGrid) * weightFunGradient(zGrid);
 
-                    GridNode* curNode = grid.getGridNode(x+(grid.spacing*di), y+(grid.spacing*dj), z+(grid.spacing*di));
-                    curNode->force -= p.volume * p.sigma * gradWeight + computeGravity(p);
+                    curNode.force -= p.volume * p.sigma * gradWeight + computeGravity(p);
                 }
             }
         }
     }
 }
 
+
+// QUICK NOTE ABOUT THIS: The full implementation described in the paper uses a semi-implicit method for solving
+//                        which results in a more stable and complex system. Since this is a push to get something out
+//                        I am just doing an explicit solve with the most basic collision handling possible.
+//                        For future implementation, fix this so that it fully implements the paper
 void MPMSolver::updateGridVel() {
+    glm::vec3 minCorner = grid.center - 0.5f * grid.dimension;
+    glm::vec3 maxCorner = grid.center + 0.5f * grid.dimension;
     // EXPLICIT UPDATE JUST TO TEST
     for (GridNode& g : grid.gridNodes) {
         if (g.mass > 0.f) {
-
-            glm::vec3 minCorner = grid.center - 0.5f * grid.dimension;
-            glm::vec3 maxCorner = grid.center + 0.5f * grid.dimension;
-
+            // COMPUTE VEL FROM GRID FORCES
             g.velocity += stepSize * (1.f/g.mass) * g.force;
+
+            // VERY SIMPLE BOUNDING COLLISION
+            // CLAMP VELOCITY AT BOUNDS
+            if (g.worldPos.x <= minCorner.x || g.worldPos.x >= maxCorner.x) {
+                g.velocity.x = 0.f;
+            }
+
+            if (g.worldPos.y <= minCorner.y || g.worldPos.y >= maxCorner.y) {
+                g.velocity.y = 0.f;
+            }
+
+            if (g.worldPos.z <= minCorner.z || g.worldPos.z >= maxCorner.z) {
+                g.velocity.z = 0.f;
+            }
         }
     }
 }

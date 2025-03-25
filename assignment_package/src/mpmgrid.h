@@ -12,6 +12,9 @@ struct GridNode {
     float mass;
     float density;
     glm::vec3 force;
+
+    glm::vec3 worldPos;
+    glm::ivec3 idx;
     GridNode();
 };
 

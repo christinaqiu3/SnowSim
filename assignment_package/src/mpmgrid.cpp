@@ -2,7 +2,8 @@
 #include <cmath>
 
 GridNode::GridNode()
-    : velocity(0.f, 0.f, 0.f), mass(0.f), density(0.f), force(0.f, 0.f, 0.f)
+    : velocity(0.f, 0.f, 0.f), mass(0.f), density(0.f), force(0.f, 0.f, 0.f),
+    worldPos(0.f, 0.f, 0.f), idx(0, 0, 0)
 {}
 
 mpmgrid::mpmgrid()
@@ -26,6 +27,24 @@ mpmgrid::mpmgrid(glm::vec3 dim, float spc, glm::vec3 cent)
     if(nz < 1) nz = 1;
 
     gridNodes.resize(nx * ny * nz);
+
+    // INITIALIZE EACH GRID NODES POSITION AND INDEX
+    glm::vec3 minCorner = center - 0.5f * dimension;
+    for(int k = 0; k < nz; ++k) {
+        for(int j = 0; j < ny; ++j) {
+            for(int i = 0; i < nx; ++i) {
+                int idx = i + nx * (j + ny * k);
+
+                gridNodes[idx].idx = glm::ivec3(i, j, k);
+
+                // CENTER POS IN WORLD SPACE
+                float xNode = minCorner.x + (i + 0.5f) * spacing;
+                float yNode = minCorner.y + (j + 0.5f) * spacing;
+                float zNode = minCorner.z + (k + 0.5f) * spacing;
+                gridNodes[idx].worldPos = glm::vec3(xNode, yNode, zNode);
+            }
+        }
+    }
 }
 
 
