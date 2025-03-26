@@ -20,7 +20,6 @@ public:
 
     void computeFE();
     void computeFP();
-    void computeSigma();
 };
 
 

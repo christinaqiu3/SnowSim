@@ -19,6 +19,12 @@ public:
     const QVector<MPMParticle>& getParticles() const;
 
     float stepSize;
+    float critCompression;
+    float critStretch;
+    float hardeningCoeff;
+    float initialDensity;
+    float youngsMod;
+    float poissonRatio;
 
 private:
     QVector<MPMParticle> particles;
@@ -29,10 +35,18 @@ private:
     glm::vec3 computeCohesion(const MPMParticle& p);
     void integrate(MPMParticle& p, glm::vec3 force);
 
+
+    // PARTICLE FUNCTIONS
+    void computeSigma();
+    void updateParticleVel();
+    void updateParticleDefGrad();
+
+    // GRID FUNCTIONS
     void particleToGridTransfer();
     void computeInitialDensity();
     void computeForce();
     void updateGridVel();
+
 };
 
 //#endif // MPMSOLVER_H

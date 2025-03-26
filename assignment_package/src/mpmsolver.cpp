@@ -1,5 +1,6 @@
 #include "mpmsolver.h"
 #include <QDebug>
+#include <Eigen/Dense>
 
 const float dt = 0.01f; // Time step
 const float gravity = -9.81f; // Gravity acceleration
@@ -12,6 +13,8 @@ void MPMSolver::addParticle(const MPMParticle& particle) {
     particles.append(particle);
 }
 
+
+// THIS IS ORIGINAL PARTICLE STUFF ?? IDK IT WAS HERE WHEN I GOT HERE
 void MPMSolver::computeForcesAndIntegrate() {
     for (MPMParticle& p : particles) {
         glm::vec3 force = computeGravity(p) + computeCohesion(p);
@@ -42,6 +45,11 @@ void MPMSolver::integrate(MPMParticle& p, glm::vec3 force) {
     p.position += p.velocity * dt;
 }
 
+const QVector<MPMParticle>& MPMSolver::getParticles() const {
+    return particles;
+}
+
+
 // THIS IS HELPER FUNCTION FOR COMPUTING WEIGHTING
 static float weightFun (float x) {
     x = abs(x);
@@ -65,6 +73,97 @@ static float weightFunGradient (float x) {
     }
 }
 
+// [======] PARTICLE FUNCTIONS [======]
+
+void MPMSolver::computeSigma() {
+    for (MPMParticle& p : particles) {
+        glm::mat3 F = p.FE;
+
+        // Polar decomposition: F = R * S
+        glm::mat3 R, S;
+        polarDecompose(F, R, S); // Or use SVD to get R from U*Sigma*V^T
+
+        float J = glm::determinant(F); // For volume correction
+
+        glm::mat3 strain = F - R;
+        //glm::mat3 stress = 2.f * mu * strain + lambda * glm::trace(strain) * glm::mat3(1.f);
+
+        p.sigma =  (1.f / J) * stress;
+    }
+}
+
+void MPMSolver::updateParticleDefGrad() {
+    //Fn+1 = (I + ∆t∇v^n+1_p)Fn
+
+    float xMin = grid.center.x - 0.5f * grid.dimension.x;
+    float yMin = grid.center.y - 0.5f * grid.dimension.y;
+    float zMin = grid.center.z - 0.5f * grid.dimension.z;
+
+    for (MPMParticle& p : particles) {
+        glm::mat3 velGrad = glm::mat3(0.f);
+
+        // WORLD SPACE POSITIONS
+        float x = p.position[0];
+        float y = p.position[1];
+        float z = p.position[2];
+
+        int i = static_cast<int>(std::floor((x - xMin) / grid.spacing ));
+        int j = static_cast<int>(std::floor((y - yMin) / grid.spacing ));
+        int k = static_cast<int>(std::floor((z - zMin) / grid.spacing ));
+
+        // YOU NEED TO DO THIS FOR ALL CELLS WITHIN SOME RADIUS
+        for(int di = -2; di < 2; di++) {
+            for(int dj = -2; dj < 2; dj++) {
+                for(int dk = -2; dk < 2; dk++) {
+                    // INDEX OF CURRENT NODE WE ARE LOOKING AT
+                    int iNode = i + di;
+                    int jNode = j + dj;
+                    int kNode = k + dk;
+
+                    // CLAMP TO BE INSIDE THE GRID DOMAIN
+                    if(iNode < 0 || iNode >= grid.nx) continue;
+                    if(jNode < 0 || jNode >= grid.ny) continue;
+                    if(kNode < 0 || kNode >= grid.nz) continue;
+
+                    int idx = iNode + grid.nx*(jNode + grid.ny*kNode);
+                    GridNode &curNode = grid.gridNodes[idx];
+
+                    // POSITION IN GRID SPACE
+                    float xGrid = (x - curNode.worldPos.x)/grid.spacing;
+                    float yGrid = (y - curNode.worldPos.y)/grid.spacing;
+                    float zGrid = (z - curNode.worldPos.z)/grid.spacing;
+
+                    // WEIGHT OF GRID CELL RELATIVE TO PARTICLE GRID
+                    float weight = weightFun(xGrid) * weightFun(yGrid) * weightFun(zGrid);
+                    if (weight == 0.0) continue;
+
+                    // TRANSFER WEIGHTED VELOCITY FROM GRID TO PARTICLE
+                    //p.velocity += curNode.velocity * weight;
+
+                    glm::vec3 gradWeight;
+                    gradWeight[0] = 1.f / grid.spacing * weightFunGradient(xGrid) * weightFun(yGrid) * weightFun(zGrid);
+                    gradWeight[1] = 1.f / grid.spacing * weightFun(xGrid) * weightFunGradient(yGrid) * weightFun(zGrid);
+                    gradWeight[2] = 1.f / grid.spacing * weightFun(xGrid) * weightFun(yGrid) * weightFunGradient(zGrid);
+
+                    // THIS IS v * gradW^T
+                    velGrad += glm::outerProduct(curNode.velocity, gradWeight);
+
+                    // NAIVE WAY OF UPDATING VELOCITY
+                    // GO BACK AND DO THE PIC/FLIP METHOD FOR BETTER RESUTLS
+                    p.velocity += curNode.velocity * weight;
+                }
+            }
+        }
+
+        // UPDATE DEFORMATION GRADIENT
+        p.FE = (glm::mat3(1.f) + stepSize * velGrad) * p.FE;
+        p.position += stepSize * p.velocity;
+    }
+}
+
+
+
+// [======] GIRD FUNCTIONS [======]
 
 void MPMSolver::particleToGridTransfer() {
     float xMin = grid.center.x - 0.5f * grid.dimension.x;
@@ -121,10 +220,6 @@ void MPMSolver::particleToGridTransfer() {
     // To convert it to actual vel we divide each gridCell by its mass
     grid.divideMass();
 
-}
-
-const QVector<MPMParticle>& MPMSolver::getParticles() const {
-    return particles;
 }
 
 // THIS SHOULD ONLY BE CALLED ONCE AT t=0
