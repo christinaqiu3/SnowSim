@@ -32,6 +32,8 @@ public:
     float mu0;
     float lambda0;
 
+    void computeInitialDensity();
+
     // THIS IS THE MAIN FUNCTION THAT SHOULD UPDATE THE SIM EACH FRAME
     void step();
 
@@ -50,7 +52,6 @@ private:
 
     // GRID FUNCTIONS
     void particleToGridTransfer();
-    void computeInitialDensity();
     void computeForce();
     void updateGridVel();
 

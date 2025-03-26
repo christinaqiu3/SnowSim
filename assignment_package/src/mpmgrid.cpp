@@ -88,8 +88,6 @@ void mpmgrid::divideMass() {
             n.velocity /= n.mass;
         }
     }
-
-
 }
 
 

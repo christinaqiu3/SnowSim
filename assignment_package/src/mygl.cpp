@@ -185,10 +185,14 @@ void MyGL::paintGL()
         particlePositions.emplace_back(solver.getParticles()[i].position, 1.0f);
     }
 
+    std::cout<< particlePositions[0].x << ", " << particlePositions[0].y << ", " << particlePositions[0].z << std::endl;
+
     particleDrawable->updateParticles(particlePositions); // Update OpenGL buffer
 
     particleDrawable->create();
     m_progFlat.draw(*particleDrawable);
+
+    update();
 }
 
 void MyGL::helperDraw(Joint* joint) {
@@ -207,12 +211,12 @@ void MyGL::on_loadButton_clicked() {
 
 
 void MyGL::initializeMPM() {
-    solver = MPMSolver(glm::vec3(2.0, 2.0, 2.0), 0.2, glm::vec3(0.0f, 0.0f, 0.0f), 0.5f,
+    solver = MPMSolver(glm::vec3(2.0, 2.0, 2.0), 0.05, glm::vec3(0.0f, 0.0f, 0.0f), 0.001f,
                         0.025f, 0.0075f, 10.f, 400.f, 140000.f, 0.2);  // Reset simulation
 
     std::vector<QVector4D> particlePositions;
-    float spacing = 0.04f;
-    glm::vec3 dim = glm::vec3(2, 2,  2);
+    float spacing = 0.1f;
+    glm::vec3 dim = glm::vec3(12, 12, 12);
     glm::vec3 origin = glm::vec3(float(dim.x), float(dim.y), float(dim.z));
     origin *= spacing * -0.5;
     for (int i = 0; i < dim.x; ++i)
@@ -224,11 +228,13 @@ void MyGL::initializeMPM() {
                 float x = origin.x + i * spacing;
                 float y = origin.y + j * spacing;
                 float z = origin.z + k * spacing;
-                solver.addParticle(MPMParticle(glm::vec3(x, y, z), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f));
-
+                solver.addParticle(MPMParticle(glm::vec3(x, y, z), glm::vec3(0.0f, -5.0f, 0.0f), 1.0f));
             }
         }
     }
+
+    solver.computeInitialDensity();
+
     if (!particleDrawable) {
         particleDrawable = new ParticleDrawable(this);
 

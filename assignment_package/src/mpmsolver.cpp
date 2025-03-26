@@ -15,9 +15,6 @@ MPMSolver::MPMSolver(glm::vec3 gridDim, float spacing, glm::vec3 gridOrigin, flo
 {
     mu0 = youngsMod / (2.f * (1.f + poissonRatio));
     lambda0 = (youngsMod * poissonRatio) / ((1.f+poissonRatio) + (1.f - 2.f*poissonRatio));
-
-    // THIS GETS RUN ONCE
-    computeInitialDensity();
 }
 
 void MPMSolver::addParticle(const MPMParticle& particle) {
@@ -197,12 +194,25 @@ void MPMSolver::updateParticleDefGrad() {
         glm::vec3 minCorner = grid.center - 0.5f * grid.dimension;
         glm::vec3 maxCorner = grid.center + 0.5f * grid.dimension;
 
-        if (p.position.x <= minCorner.x) { p.position.x = minCorner.x; }
-        if (p.position.x >= maxCorner.x) { p.position.x = maxCorner.x; }
-        if (p.position.y <= minCorner.y) { p.position.y = minCorner.y; }
-        if (p.position.y >= maxCorner.y) { p.position.y = maxCorner.y; }
-        if (p.position.z <= minCorner.z) { p.position.z = minCorner.z; }
-        if (p.position.z >= maxCorner.z) { p.position.z = maxCorner.z; }
+        float damping = 0.0f; // or try 0.01f, 0.1f for bounciness
+
+        for (MPMParticle &p : particles) {
+            for (int axis = 0; axis < 3; ++axis) {
+                if (p.position[axis] < minCorner[axis]) {
+                    p.position[axis] = minCorner[axis];
+                    if (p.velocity[axis] < 0.f) {
+                        p.velocity[axis] *= -damping;
+                    }
+                }
+
+                if (p.position[axis] > maxCorner[axis]) {
+                    p.position[axis] = maxCorner[axis];
+                    if (p.velocity[axis] > 0.f) {
+                        p.velocity[axis] *= -damping;
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -264,7 +274,6 @@ void MPMSolver::particleToGridTransfer() {
     // Currently the velocity stored is actually the total weighted momentum
     // To convert it to actual vel we divide each gridCell by its mass
     grid.divideMass();
-
 }
 
 // THIS SHOULD ONLY BE CALLED ONCE AT t=0
@@ -272,6 +281,51 @@ void MPMSolver::computeInitialDensity() {
     float xMin = grid.center.x - 0.5f * grid.dimension.x;
     float yMin = grid.center.y - 0.5f * grid.dimension.y;
     float zMin = grid.center.z - 0.5f * grid.dimension.z;
+
+    grid.clearGrid();
+    for (MPMParticle& p : particles) {
+        // World space positions
+        float x = p.position[0];
+        float y = p.position[1];
+        float z = p.position[2];
+
+        int i = static_cast<int>(std::floor((x - xMin) / grid.spacing ));
+        int j = static_cast<int>(std::floor((y - yMin) / grid.spacing ));
+        int k = static_cast<int>(std::floor((z - zMin) / grid.spacing ));
+
+        // YOU NEED TO DO THIS FOR ALL CELLS WITHIN SOME RADIUS
+        for(int di = -2; di < 2; di++) {
+            for(int dj = -2; dj < 2; dj++) {
+                for(int dk = -2; dk < 2; dk++) {
+                    // INDEX OF CURRENT NODE WE ARE LOOKING AT
+                    int iNode = i + di;
+                    int jNode = j + dj;
+                    int kNode = k + dk;
+
+                    // CLAMP TO BE INSIDE THE GRID DOMAIN
+                    if(iNode < 0 || iNode >= grid.nx) continue;
+                    if(jNode < 0 || jNode >= grid.ny) continue;
+                    if(kNode < 0 || kNode >= grid.nz) continue;
+
+
+                    int idx = iNode + grid.nx*(jNode + grid.ny*kNode);
+                    GridNode &curNode = grid.gridNodes[idx];
+
+                    // POSITION IN GRID SPACE
+                    float xGrid = (x - curNode.worldPos.x)/grid.spacing;
+                    float yGrid = (y - curNode.worldPos.y)/grid.spacing;
+                    float zGrid = (z - curNode.worldPos.z)/grid.spacing;
+
+                    // WEIGHT OF GRID CELL RELATICE TO PARTICLE GRID
+                    float weight = weightFun(xGrid) * weightFun(yGrid) * weightFun(zGrid);
+                    if (weight == 0.0) continue;
+
+                    // UPDATE CURRENT NODE WE ARE LOOKING AT
+                    curNode.mass += p.mass * weight;
+                }
+            }
+        }
+    }
 
     // COMPUTE GRID DENSITY
     float volume = grid.spacing * grid.spacing * grid.spacing;
