@@ -19,7 +19,8 @@ MyGL::MyGL(QWidget *parent)
       m_geomSquare(this),
     m_progLambert(this), m_progFlat(this), m_prog_skeleton(this),
     m_glCamera(), m_mesh(this),
-    solver(glm::vec3(5.0, 5.0, 5.0), 1.0, glm::vec3(0.0f, 0.0f, 0.0f), 0.5f),
+    solver(glm::vec3(5.0, 5.0, 5.0), 1.0, glm::vec3(0.0f, 0.0f, 0.0f), 0.5f,
+             0.025f, 0.0075f, 10.f, 400.f, 140000.f, 0.2),
     m_joint(nullptr), m_vertDisplay(this), m_halfedgeDisplay(this),
     m_faceDisplay(this),
     vx(0), vy(0), vz(0),
@@ -78,6 +79,8 @@ void MyGL::initializeGL()
     // using multiple VAOs, we can just bind one once.
     glBindVertexArray(vao);
 
+    // MPM STUFF:
+    initializeMPM();
 }
 
 void MyGL::resizeGL(int w, int h)
@@ -174,17 +177,18 @@ void MyGL::paintGL()
     //     particlePositions.push_back(QVector4D(p.position.x(), p.position.y(), 0.0f, 1.0f));
     // }
 
-    initializeMPM();
+
     //std::cout << "Size1 = " << particlePositions.size() << std::endl;
+    solver.step();
     std::vector<glm::vec4> particlePositions;
     for (int i = 0; i<solver.getParticles().size(); i++) {
         particlePositions.emplace_back(solver.getParticles()[i].position, 1.0f);
     }
+
     particleDrawable->updateParticles(particlePositions); // Update OpenGL buffer
 
     particleDrawable->create();
     m_progFlat.draw(*particleDrawable);
-
 }
 
 void MyGL::helperDraw(Joint* joint) {
@@ -203,11 +207,12 @@ void MyGL::on_loadButton_clicked() {
 
 
 void MyGL::initializeMPM() {
-    solver = MPMSolver(glm::vec3(5.0, 5.0, 5.0), 1.0, glm::vec3(0.0f, 0.0f, 0.0f), 1.f);  // Reset simulation
+    solver = MPMSolver(glm::vec3(2.0, 2.0, 2.0), 0.2, glm::vec3(0.0f, 0.0f, 0.0f), 0.5f,
+                        0.025f, 0.0075f, 10.f, 400.f, 140000.f, 0.2);  // Reset simulation
 
     std::vector<QVector4D> particlePositions;
-    float spacing = 0.2f;
-    glm::vec3 dim = glm::vec3(8, 8,  8);
+    float spacing = 0.04f;
+    glm::vec3 dim = glm::vec3(2, 2,  2);
     glm::vec3 origin = glm::vec3(float(dim.x), float(dim.y), float(dim.z));
     origin *= spacing * -0.5;
     for (int i = 0; i < dim.x; ++i)
@@ -224,9 +229,16 @@ void MyGL::initializeMPM() {
             }
         }
     }
-    //if (!particleDrawable) {
+    if (!particleDrawable) {
         particleDrawable = new ParticleDrawable(this);
-    //}
+
+        // SETUP INITIAL DRAWABLE PARTICLES
+        std::vector<glm::vec4> particlePositions;
+        for (int i = 0; i<solver.getParticles().size(); i++) {
+            particlePositions.emplace_back(solver.getParticles()[i].position, 1.0f);
+        }
+        particleDrawable->updateParticles(particlePositions);
+    }
 }
 
 void MyGL::updateSimulation() {

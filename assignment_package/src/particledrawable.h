@@ -17,11 +17,12 @@
 
 class ParticleDrawable : public Drawable {
 private:
-    std::vector<glm::vec4> positions;
+    //std::vector<glm::vec4> positions;
 
 public:
     ParticleDrawable(OpenGLContext* context);
 
+    std::vector<glm::vec4> positions;
     void create() override;
     void updateParticles(const std::vector<glm::vec4>& newPositions); // Update particle positions
     GLenum drawMode() override;

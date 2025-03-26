@@ -6,8 +6,19 @@ const float dt = 0.01f; // Time step
 const float gravity = -9.81f; // Gravity acceleration
 const float cohesionStrength = 0.1f; // Cohesion force factor
 
-MPMSolver::MPMSolver(glm::vec3 gridDim, float spacing, glm::vec3 gridOrigin, float dt)
-    : stepSize(dt), grid(glm::vec3(gridDim), spacing, glm::vec3(gridOrigin)) {}
+MPMSolver::MPMSolver(glm::vec3 gridDim, float spacing, glm::vec3 gridOrigin, float dt,
+                     float critCompression, float critStretch, float hardeningCoeff,
+                     float initialDensity, float youngsMod, float poissonRatio)
+    : stepSize(dt), grid(glm::vec3(gridDim), spacing, glm::vec3(gridOrigin)),
+    critCompression(critCompression), critStretch(critStretch), hardeningCoeff(hardeningCoeff),
+    initialDensity(initialDensity), youngsMod(youngsMod), poissonRatio(poissonRatio)
+{
+    mu0 = youngsMod / (2.f * (1.f + poissonRatio));
+    lambda0 = (youngsMod * poissonRatio) / ((1.f+poissonRatio) + (1.f - 2.f*poissonRatio));
+
+    // THIS GETS RUN ONCE
+    computeInitialDensity();
+}
 
 void MPMSolver::addParticle(const MPMParticle& particle) {
     particles.append(particle);
@@ -49,6 +60,13 @@ const QVector<MPMParticle>& MPMSolver::getParticles() const {
     return particles;
 }
 
+void MPMSolver::step() {
+    grid.clearGrid();
+    particleToGridTransfer();
+    computeForce();
+    updateGridVel();
+    updateParticleDefGrad();
+}
 
 // THIS IS HELPER FUNCTION FOR COMPUTING WEIGHTING
 static float weightFun (float x) {
@@ -77,18 +95,34 @@ static float weightFunGradient (float x) {
 
 void MPMSolver::computeSigma() {
     for (MPMParticle& p : particles) {
-        glm::mat3 F = p.FE;
+        // CONVERT GLM MATRIX TO EIGEN
+        Eigen::Matrix3f F = Eigen::Matrix3f();
 
-        // Polar decomposition: F = R * S
-        glm::mat3 R, S;
-        polarDecompose(F, R, S); // Or use SVD to get R from U*Sigma*V^T
+        for (int col = 0; col < 3; ++col) {
+            for (int row = 0; row < 3; ++row) {
+                F(row, col) = p.FE[col][row];
+            }
+        }
 
-        float J = glm::determinant(F); // For volume correction
+        // COMPUTE POLAR DECOMP TO GET ROTATIONAL PART OF F
+        Eigen::JacobiSVD<Eigen::Matrix3f> svd(F, Eigen::ComputeFullU | Eigen::ComputeFullV);
+        Eigen::Matrix3f U = svd.matrixU();
+        Eigen::Matrix3f V = svd.matrixV();
 
-        glm::mat3 strain = F - R;
-        //glm::mat3 stress = 2.f * mu * strain + lambda * glm::trace(strain) * glm::mat3(1.f);
+        Eigen::Matrix3f R = U * V.transpose();
+        float J = F.determinant();
 
-        p.sigma =  (1.f / J) * stress;
+        Eigen::Matrix3f strain = F - R;
+
+        // SINCE WE HAVE NO FP: mu = mu0 and lambda = lambda0 for the entire sim
+        // CHANGE THIS LATER
+        Eigen::Matrix3f sigma = 2.f * mu0 * strain + lambda0 * strain.trace() * Eigen::Matrix3f::Identity();
+        sigma *= (1.f / J); // Cauchy stress
+
+        // CONVERT BACK TO GLM
+        p.sigma = glm::mat3(sigma(0,0), sigma(0,1), sigma(0,2),
+                            sigma(1,0), sigma(1,1), sigma(1,2),
+                            sigma(2,0), sigma(2,1), sigma(2,2));
     }
 }
 
@@ -157,7 +191,18 @@ void MPMSolver::updateParticleDefGrad() {
 
         // UPDATE DEFORMATION GRADIENT
         p.FE = (glm::mat3(1.f) + stepSize * velGrad) * p.FE;
+        // UPDATE POINT POSITIONS
         p.position += stepSize * p.velocity;
+
+        glm::vec3 minCorner = grid.center - 0.5f * grid.dimension;
+        glm::vec3 maxCorner = grid.center + 0.5f * grid.dimension;
+
+        if (p.position.x <= minCorner.x) { p.position.x = minCorner.x; }
+        if (p.position.x >= maxCorner.x) { p.position.x = maxCorner.x; }
+        if (p.position.y <= minCorner.y) { p.position.y = minCorner.y; }
+        if (p.position.y >= maxCorner.y) { p.position.y = maxCorner.y; }
+        if (p.position.z <= minCorner.z) { p.position.z = minCorner.z; }
+        if (p.position.z >= maxCorner.z) { p.position.z = maxCorner.z; }
     }
 }
 
@@ -292,6 +337,9 @@ void MPMSolver::computeForce() {
     float xMin = grid.center.x - 0.5f * grid.dimension.x;
     float yMin = grid.center.y - 0.5f * grid.dimension.y;
     float zMin = grid.center.z - 0.5f * grid.dimension.z;
+
+    // UPDATE CAUCHY STRESS FOR EACH PARTICLE
+    computeSigma();
 
     for (MPMParticle& p : particles) {
         // World space positions

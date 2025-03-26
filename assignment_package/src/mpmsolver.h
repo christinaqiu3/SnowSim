@@ -12,7 +12,10 @@
 class MPMSolver
 {
 public:
-    MPMSolver(glm::vec3 gridDim, float spacing, glm::vec3 gridOrigin, float dt);
+    MPMSolver(glm::vec3 gridDim, float spacing, glm::vec3 gridOrigin, float dt,
+              float critCompression, float critStretch,
+              float hardeningCoeff, float initialDensity, float youngsMod,
+              float poissonRatio);
     void addParticle(const MPMParticle& particle);
     void computeForcesAndIntegrate();
 
@@ -26,6 +29,12 @@ public:
     float youngsMod;
     float poissonRatio;
 
+    float mu0;
+    float lambda0;
+
+    // THIS IS THE MAIN FUNCTION THAT SHOULD UPDATE THE SIM EACH FRAME
+    void step();
+
 private:
     QVector<MPMParticle> particles;
     mpmgrid grid;
@@ -35,10 +44,8 @@ private:
     glm::vec3 computeCohesion(const MPMParticle& p);
     void integrate(MPMParticle& p, glm::vec3 force);
 
-
     // PARTICLE FUNCTIONS
     void computeSigma();
-    void updateParticleVel();
     void updateParticleDefGrad();
 
     // GRID FUNCTIONS
