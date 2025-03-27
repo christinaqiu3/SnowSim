@@ -66,6 +66,7 @@ void MPMSolver::step() {
 }
 
 // THIS IS HELPER FUNCTION FOR COMPUTING WEIGHTING
+// TODO : ENSURE ALL WEIGHTS IN KERNEL ADD UP TO 1
 static float weightFun (float x) {
     x = abs(x);
     if (x >= 0.f && x < 1.f) {

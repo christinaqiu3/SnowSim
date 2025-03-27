@@ -211,7 +211,7 @@ void MyGL::on_loadButton_clicked() {
 
 
 void MyGL::initializeMPM() {
-    solver = MPMSolver(glm::vec3(2.0, 2.0, 2.0), 0.05, glm::vec3(0.0f, 0.0f, 0.0f), 0.001f,
+    solver = MPMSolver(glm::vec3(2.0, 2.0, 2.0), 0.05, glm::vec3(0.0f, 0.0f, 0.0f), 0.00001f,
                         0.025f, 0.0075f, 10.f, 400.f, 140000.f, 0.2);  // Reset simulation
 
     std::vector<QVector4D> particlePositions;
