@@ -25,31 +25,40 @@
     </property>
    </widget>
    <widget class="QListWidget" name="vertsListWidget">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
-      <x>950</x>
+      <x>670</x>
       <y>50</y>
-      <width>71</width>
+      <width>16</width>
       <height>171</height>
      </rect>
     </property>
    </widget>
    <widget class="QListWidget" name="halfEdgesListWidget">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
-      <x>1030</x>
+      <x>690</x>
       <y>50</y>
-      <width>71</width>
+      <width>16</width>
       <height>171</height>
      </rect>
     </property>
    </widget>
    <widget class="QListWidget" name="facesListWidget">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
-      <x>1110</x>
+      <x>710</x>
       <y>50</y>
-      <width>71</width>
+      <width>16</width>
       <height>171</height>
      </rect>
     </property>
@@ -57,8 +66,8 @@
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>950</x>
-      <y>220</y>
+      <x>650</x>
+      <y>370</y>
       <width>71</width>
       <height>31</height>
      </rect>
@@ -73,8 +82,8 @@
    <widget class="QLabel" name="label_2">
     <property name="geometry">
      <rect>
-      <x>1030</x>
-      <y>220</y>
+      <x>730</x>
+      <y>370</y>
       <width>71</width>
       <height>31</height>
      </rect>
@@ -89,8 +98,8 @@
    <widget class="QLabel" name="label_3">
     <property name="geometry">
      <rect>
-      <x>1110</x>
-      <y>220</y>
+      <x>810</x>
+      <y>370</y>
       <width>71</width>
       <height>31</height>
      </rect>
@@ -103,9 +112,12 @@
     </property>
    </widget>
    <widget class="QDoubleSpinBox" name="vertPosXSpinBox">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
-      <x>1020</x>
+      <x>1010</x>
       <y>261</y>
       <width>51</width>
       <height>21</height>
@@ -116,9 +128,12 @@
     </property>
    </widget>
    <widget class="QDoubleSpinBox" name="vertPosYSpinBox">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
-      <x>1081</x>
+      <x>1071</x>
       <y>261</y>
       <width>51</width>
       <height>21</height>
@@ -129,9 +144,12 @@
     </property>
    </widget>
    <widget class="QDoubleSpinBox" name="vertPosZSpinBox">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
-      <x>1141</x>
+      <x>1131</x>
       <y>261</y>
       <width>51</width>
       <height>21</height>
@@ -142,9 +160,12 @@
     </property>
    </widget>
    <widget class="QLabel" name="label_4">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
-      <x>950</x>
+      <x>940</x>
       <y>260</y>
       <width>71</width>
       <height>21</height>
@@ -155,9 +176,12 @@
     </property>
    </widget>
    <widget class="QLabel" name="label_5">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
-      <x>1019</x>
+      <x>1009</x>
       <y>285</y>
       <width>51</width>
       <height>20</height>
@@ -171,9 +195,12 @@
     </property>
    </widget>
    <widget class="QLabel" name="label_6">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
-      <x>1080</x>
+      <x>1070</x>
       <y>285</y>
       <width>51</width>
       <height>20</height>
@@ -187,9 +214,12 @@
     </property>
    </widget>
    <widget class="QLabel" name="label_7">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
-      <x>1140</x>
+      <x>1130</x>
       <y>285</y>
       <width>51</width>
       <height>20</height>
@@ -203,9 +233,12 @@
     </property>
    </widget>
    <widget class="QLabel" name="label_8">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
-      <x>1140</x>
+      <x>1130</x>
       <y>330</y>
       <width>51</width>
       <height>20</height>
@@ -219,9 +252,12 @@
     </property>
    </widget>
    <widget class="QLabel" name="label_9">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
-      <x>1019</x>
+      <x>1009</x>
       <y>330</y>
       <width>51</width>
       <height>20</height>
@@ -235,9 +271,12 @@
     </property>
    </widget>
    <widget class="QDoubleSpinBox" name="faceBlueSpinBox">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
-      <x>1141</x>
+      <x>1131</x>
       <y>310</y>
       <width>51</width>
       <height>21</height>
@@ -251,9 +290,12 @@
     </property>
    </widget>
    <widget class="QLabel" name="label_10">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
-      <x>950</x>
+      <x>940</x>
       <y>310</y>
       <width>71</width>
       <height>21</height>
@@ -264,9 +306,12 @@
     </property>
    </widget>
    <widget class="QDoubleSpinBox" name="faceGreenSpinBox">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
-      <x>1081</x>
+      <x>1071</x>
       <y>310</y>
       <width>51</width>
       <height>21</height>
@@ -280,9 +325,12 @@
     </property>
    </widget>
    <widget class="QDoubleSpinBox" name="faceRedSpinBox">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
-      <x>1020</x>
+      <x>1010</x>
       <y>310</y>
       <width>51</width>
       <height>21</height>
@@ -296,9 +344,12 @@
     </property>
    </widget>
    <widget class="QLabel" name="label_11">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
-      <x>1080</x>
+      <x>1070</x>
       <y>330</y>
       <width>51</width>
       <height>20</height>
@@ -325,10 +376,13 @@
     </property>
    </widget>
    <widget class="QPushButton" name="addMidpoint">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
-      <x>950</x>
-      <y>370</y>
+      <x>740</x>
+      <y>140</y>
       <width>91</width>
       <height>32</height>
      </rect>
@@ -338,10 +392,13 @@
     </property>
    </widget>
    <widget class="QPushButton" name="triangulateFace">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
-      <x>950</x>
-      <y>410</y>
+      <x>740</x>
+      <y>200</y>
       <width>91</width>
       <height>32</height>
      </rect>
@@ -351,10 +408,13 @@
     </property>
    </widget>
    <widget class="QPushButton" name="catmullClark">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
-      <x>1060</x>
-      <y>370</y>
+      <x>740</x>
+      <y>170</y>
       <width>91</width>
       <height>32</height>
      </rect>
@@ -376,28 +436,15 @@
      <string>Choose JSON</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_12">
-    <property name="geometry">
-     <rect>
-      <x>650</x>
-      <y>220</y>
-      <width>281</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Joints</string>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignCenter</set>
-    </property>
-   </widget>
    <widget class="QTreeWidget" name="jointsTreeWidget">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>650</x>
       <y>50</y>
-      <width>281</width>
+      <width>16</width>
       <height>171</height>
      </rect>
     </property>
@@ -408,10 +455,13 @@
     </column>
    </widget>
    <widget class="QPushButton" name="meshSkinning">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
-      <x>650</x>
-      <y>410</y>
+      <x>830</x>
+      <y>50</y>
       <width>100</width>
       <height>32</height>
      </rect>
@@ -421,6 +471,9 @@
     </property>
    </widget>
    <widget class="QLabel" name="label_13">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>660</x>
@@ -434,6 +487,9 @@
     </property>
    </widget>
    <widget class="QLabel" name="label_14">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>740</x>
@@ -450,6 +506,9 @@
     </property>
    </widget>
    <widget class="QDoubleSpinBox" name="jointPosZSpinBox">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>860</x>
@@ -463,6 +522,9 @@
     </property>
    </widget>
    <widget class="QLabel" name="label_15">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>860</x>
@@ -479,6 +541,9 @@
     </property>
    </widget>
    <widget class="QDoubleSpinBox" name="jointPosXSpinBox">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>740</x>
@@ -492,6 +557,9 @@
     </property>
    </widget>
    <widget class="QDoubleSpinBox" name="jointPosYSpinBox">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>800</x>
@@ -505,6 +573,9 @@
     </property>
    </widget>
    <widget class="QLabel" name="label_16">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>800</x>
@@ -521,10 +592,13 @@
     </property>
    </widget>
    <widget class="QPushButton" name="jointRotXPlus">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
-      <x>650</x>
-      <y>370</y>
+      <x>740</x>
+      <y>50</y>
       <width>41</width>
       <height>32</height>
      </rect>
@@ -534,10 +608,13 @@
     </property>
    </widget>
    <widget class="QPushButton" name="jointRotYPlus">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
-      <x>750</x>
-      <y>370</y>
+      <x>740</x>
+      <y>80</y>
       <width>41</width>
       <height>32</height>
      </rect>
@@ -547,10 +624,13 @@
     </property>
    </widget>
    <widget class="QPushButton" name="jointRotZPlus">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
-      <x>850</x>
-      <y>370</y>
+      <x>740</x>
+      <y>110</y>
       <width>41</width>
       <height>32</height>
      </rect>
@@ -560,6 +640,9 @@
     </property>
    </widget>
    <widget class="QLabel" name="label_17">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>660</x>
@@ -573,10 +656,13 @@
     </property>
    </widget>
    <widget class="QPushButton" name="jointRotXMinus">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
-      <x>690</x>
-      <y>370</y>
+      <x>780</x>
+      <y>50</y>
       <width>41</width>
       <height>32</height>
      </rect>
@@ -586,10 +672,13 @@
     </property>
    </widget>
    <widget class="QPushButton" name="jointRotYMinus">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
-      <x>790</x>
-      <y>370</y>
+      <x>780</x>
+      <y>80</y>
       <width>41</width>
       <height>32</height>
      </rect>
@@ -599,10 +688,13 @@
     </property>
    </widget>
    <widget class="QPushButton" name="jointRotZMinus">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
-      <x>890</x>
-      <y>370</y>
+      <x>780</x>
+      <y>110</y>
       <width>41</width>
       <height>32</height>
      </rect>
@@ -612,6 +704,9 @@
     </property>
    </widget>
    <widget class="QTextBrowser" name="jointRotX">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>740</x>
@@ -622,6 +717,9 @@
     </property>
    </widget>
    <widget class="QLabel" name="label_18">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>860</x>
@@ -638,6 +736,9 @@
     </property>
    </widget>
    <widget class="QLabel" name="label_19">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>740</x>
@@ -654,6 +755,9 @@
     </property>
    </widget>
    <widget class="QLabel" name="label_20">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>800</x>
@@ -670,6 +774,9 @@
     </property>
    </widget>
    <widget class="QTextBrowser" name="jointRotY">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>800</x>
@@ -680,6 +787,9 @@
     </property>
    </widget>
    <widget class="QTextBrowser" name="jointRotZ">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>860</x>
@@ -703,10 +813,13 @@
     </property>
    </widget>
    <widget class="QPushButton" name="changeColor">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
-      <x>1000</x>
-      <y>10</y>
+      <x>830</x>
+      <y>80</y>
       <width>101</width>
       <height>31</height>
      </rect>
@@ -718,8 +831,8 @@
    <widget class="QPushButton" name="MPM">
     <property name="geometry">
      <rect>
-      <x>830</x>
-      <y>410</y>
+      <x>1000</x>
+      <y>10</y>
       <width>101</width>
       <height>31</height>
      </rect>
