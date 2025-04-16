@@ -9,7 +9,7 @@
 
 struct GridNode {
     glm::vec3 velocity;
-    glm::vec3 prevVelovity;
+    glm::vec3 prevVelocity;
     float mass;
     float density;
     glm::vec3 force;

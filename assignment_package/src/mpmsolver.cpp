@@ -189,7 +189,7 @@ void MPMSolver::updateParticleDefGrad() {
                     velGrad += glm::outerProduct(curNode.velocity, gradWeight);
 
                     vPic += curNode.velocity * weight;
-                    vFlip += (curNode.velocity - curNode.prevVelovity) * weight;
+                    vFlip += (curNode.velocity - curNode.prevVelocity) * weight;
                 }
             }
         }
