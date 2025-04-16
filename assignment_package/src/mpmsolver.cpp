@@ -300,6 +300,7 @@ void MPMSolver::particleToGridTransfer() {
 
     grid.clearGrid();
     for (MPMParticle& p : particles) {
+
         // World space positions
         float x = p.position[0];
         float y = p.position[1];
@@ -336,17 +337,31 @@ void MPMSolver::particleToGridTransfer() {
                     float weight = weightFun(xGrid) * weightFun(yGrid) * weightFun(zGrid);
                     if (weight == 0.0) continue;
 
+
                     // UPDATE CURRENT NODE WE ARE LOOKING AT
                     curNode.mass += p.mass * weight;
                     curNode.velocity += p.velocity * p.mass * weight;
+
+                    if (glm::length(p.velocity) > 1e-6f) { // Only if velocity is non-zero
+                        curNode.velocityMass += curNode.mass;
+                    }
                 }
             }
         }
     }
 
+    // Normalize grid node velocities using only effective mass
+    for (GridNode& node : grid.gridNodes) {
+        if (node.velocityMass > 0.f) {
+            node.velocity /= node.velocityMass;
+        } else {
+            node.velocity = glm::vec3(0.f);
+        }
+    }
+
     // Currently the velocity stored is actually the total weighted momentum
     // To convert it to actual vel we divide each gridCell by its mass
-    grid.divideMass();
+    //grid.divideMass();
 }
 
 // THIS SHOULD ONLY BE CALLED ONCE AT t=0

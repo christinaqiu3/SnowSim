@@ -3,7 +3,7 @@
 
 GridNode::GridNode()
     : velocity(0.f, 0.f, 0.f), prevVelocity(0.f, 0.f, 0.f), mass(0.f), density(0.f), force(0.f, 0.f, 0.f),
-    worldPos(0.f, 0.f, 0.f), idx(0, 0, 0)
+    worldPos(0.f, 0.f, 0.f), idx(0, 0, 0), velocityMass(0.f)
 {}
 
 mpmgrid::mpmgrid()
