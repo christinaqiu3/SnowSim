@@ -94,28 +94,34 @@ static float weightFunGradient (float x) {
 void MPMSolver::computeSigma() {
     for (MPMParticle& p : particles) {
         // CONVERT GLM MATRIX TO EIGEN
-        Eigen::Matrix3f F = Eigen::Matrix3f();
+        Eigen::Matrix3f Fe = Eigen::Matrix3f::Identity();
+        Eigen::Matrix3f Fp = Eigen::Matrix3f::Identity();
 
         for (int col = 0; col < 3; ++col) {
             for (int row = 0; row < 3; ++row) {
-                F(row, col) = p.FE[col][row];
+                Fe(row, col) = p.FE[col][row];
+                Fp(row, col) = p.FP[col][row];
             }
         }
 
         // COMPUTE POLAR DECOMP TO GET ROTATIONAL PART OF F
-        Eigen::JacobiSVD<Eigen::Matrix3f> svd(F, Eigen::ComputeFullU | Eigen::ComputeFullV);
+        Eigen::JacobiSVD<Eigen::Matrix3f> svd(Fe, Eigen::ComputeFullU | Eigen::ComputeFullV);
         Eigen::Matrix3f U = svd.matrixU();
         Eigen::Matrix3f V = svd.matrixV();
-
         Eigen::Matrix3f R = U * V.transpose();
-        float J = F.determinant();
 
-        Eigen::Matrix3f strain = F - R;
+        float Je = Fe.determinant();  // Elastic volume
+        float Jp = Fp.determinant();  // Plastic volume
 
-        // SINCE WE HAVE NO FP: mu = mu0 and lambda = lambda0 for the entire sim
-        // CHANGE THIS LATER
-        Eigen::Matrix3f sigma = 2.f * mu0 * strain + lambda0 * strain.trace() * Eigen::Matrix3f::Identity();
-        sigma *= (1.f / J); // Cauchy stress
+        float xi = 10.0f; // default value, tweak as needed
+
+        // Plastic-hardening-modified Lame parameters
+        float mu = mu0 * std::exp(xi * (1.0f - Jp));
+        float lambda = lambda0 * std::exp(xi * (1.0f - Jp));
+
+        Eigen::Matrix3f strain = Fe - R;
+        Eigen::Matrix3f sigma = 2.f * mu * strain + lambda * (Je - 1.0f) * Eigen::Matrix3f::Identity();
+        sigma *= (1.f / Je); // Cauchy stress
 
         // CONVERT BACK TO GLM
         p.sigma = glm::mat3(sigma(0,0), sigma(0,1), sigma(0,2),
@@ -219,7 +225,7 @@ void MPMSolver::updateParticleDefGrad() {
 
 
 
-// [======] GIRD FUNCTIONS [======]
+// [======] GRID FUNCTIONS [======]
 
 void MPMSolver::particleToGridTransfer() {
     float xMin = grid.center.x - 0.5f * grid.dimension.x;
@@ -449,6 +455,7 @@ void MPMSolver::computeForce() {
 void MPMSolver::updateGridVel() {
     glm::vec3 minCorner = grid.center - 0.5f * grid.dimension;
     glm::vec3 maxCorner = grid.center + 0.5f * grid.dimension;
+
     // EXPLICIT UPDATE JUST TO TEST
     for (GridNode& g : grid.gridNodes) {
         if (g.mass > 0.f) {
@@ -470,5 +477,52 @@ void MPMSolver::updateGridVel() {
             }
         }
     }
+
+    // const int n = grid.gridNodes.size();
+    // std::vector<Vector3> b(n);          // RHS vector (h * force)
+    // std::vector<Vector3> deltaV(n, Vector3(0.0f)); // Unknown we're solving for
+
+    // // Assemble right-hand side: b = h * f
+    // for (int i = 0; i < n; ++i) {
+    //     GridNode& g = grid.gridNodes[i];
+    //     if (g.mass > 0.f) {
+    //         b[i] = stepSize * g.force;
+    //     }
+    // }
+
+
+    // // Conjugate Gradient Solver to solve:
+    // // (M - h² * K) * deltaV = b
+    // // Matrix-vector multiply is done by a custom function applySystemMatrix()
+
+    // const int maxIters = 100;
+    // const float tol = 1e-5;
+
+    // conjugateGradientSolve(
+    //     deltaV,
+    //     b,
+    //     [&](const std::vector<Vector3>& x) {
+    //         return applySystemMatrix(x);
+    //     },
+    //     maxIters,
+    //     tol
+    //     );
+
+    // // Apply deltaV to get new velocities
+    // for (int i = 0; i < n; ++i) {
+    //     GridNode& g = grid.gridNodes[i];
+    //     if (g.mass > 0.f) {
+    //         g.velocity += deltaV[i];
+
+    //         // BOUNDING COLLISION (as before)
+    //         if (g.worldPos.x <= minCorner.x || g.worldPos.x >= maxCorner.x)
+    //             g.velocity.x = 0.f;
+    //         if (g.worldPos.y <= minCorner.y || g.worldPos.y >= maxCorner.y)
+    //             g.velocity.y = 0.f;
+    //         if (g.worldPos.z <= minCorner.z || g.worldPos.z >= maxCorner.z)
+    //             g.velocity.z = 0.f;
+    //     }
+    // }
 }
+
 
