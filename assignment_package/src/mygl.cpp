@@ -219,15 +219,82 @@ void MyGL::initializeMPM() {
     glm::vec3 dim = glm::vec3(12, 12, 12);
     glm::vec3 origin = glm::vec3(float(dim.x), float(dim.y), float(dim.z));
     origin *= spacing * -0.5;
-    for (int i = 0; i < dim.x; ++i)
-    {
-        for (int j = 0; j < dim.y; ++j)
-        {
-            for (int k = 0; k < dim.z; ++k)
-            {
-                float x = origin.x + i * spacing;
+
+    // CUBE TEST
+
+    // for (int i = 0; i < dim.x; ++i)
+    // {
+    //     for (int j = 0; j < dim.y; ++j)
+    //     {
+    //         for (int k = 0; k < dim.z; ++k)
+    //         {
+    //             float x = origin.x + i * spacing;
+    //             float y = origin.y + j * spacing;
+    //             float z = origin.z + k * spacing;
+    //             solver.addParticle(MPMParticle(glm::vec3(x, y, z), glm::vec3(0.0f, -5000.0f, 0.0f), 1.0f));
+    //         }
+    //     }
+    // }
+
+
+    // SPHERE TEST
+
+    // float radius = 0.5f * std::min({dim.x, dim.y, dim.z}) * spacing; // or any radius you want
+    // glm::vec3 center = origin + 0.5f * glm::vec3(dim) * spacing;
+
+    // for (int i = 0; i < dim.x; ++i) {
+    //     for (int j = 0; j < dim.y; ++j) {
+    //         for (int k = 0; k < dim.z; ++k) {
+    //             float x = origin.x + i * spacing;
+    //             float y = origin.y + j * spacing;
+    //             float z = origin.z + k * spacing;
+
+    //             glm::vec3 pos(x, y, z);
+    //             if (glm::length(pos - center) <= radius) {
+    //                 solver.addParticle(MPMParticle(pos, glm::vec3(0.0f, -5000.0f, 0.0f), 1.0f));
+    //             }
+    //         }
+    //     }
+    // }
+
+    // PYRAMID TEST
+
+    // glm::vec3 baseCenter = origin + glm::vec3(0.5f * dim.x * spacing, 0.0f, 0.5f * dim.z * spacing);
+    // int maxHeight = dim.y;
+
+    // for (int j = 0; j < dim.y; ++j) { // height
+    //     float layerScale = 1.0f - static_cast<float>(j) / maxHeight; // shrink layers as j increases (going up)
+    //     int layerRadiusX = static_cast<int>(0.5f * dim.x * layerScale);
+    //     int layerRadiusZ = static_cast<int>(0.5f * dim.z * layerScale);
+
+    //     for (int i = -layerRadiusX; i <= layerRadiusX; ++i) {
+    //         for (int k = -layerRadiusZ; k <= layerRadiusZ; ++k) {
+    //             float x = baseCenter.x + i * spacing;
+    //             float y = origin.y + j * spacing;
+    //             float z = baseCenter.z + k * spacing;
+
+    //             solver.addParticle(MPMParticle(glm::vec3(x, y, z), glm::vec3(0.0f, -5000.0f, 0.0f), 1.0f));
+    //         }
+    //     }
+    // }
+
+    // UPSIDE DOWN PYRAMID TEST
+
+    glm::vec3 tipCenter = origin + glm::vec3(0.5f * dim.x * spacing, 0.0f, 0.5f * dim.z * spacing);
+    int maxHeight = dim.y;
+    float baseMultiplier = 2.0f; // Make the base 2x wider than default
+
+    for (int j = 0; j < dim.y; ++j) {
+        float layerScale = static_cast<float>(j) / maxHeight;
+        int layerRadiusX = static_cast<int>(0.5f * dim.x * layerScale * baseMultiplier);
+        int layerRadiusZ = static_cast<int>(0.5f * dim.z * layerScale * baseMultiplier);
+
+        for (int i = -layerRadiusX; i <= layerRadiusX; ++i) {
+            for (int k = -layerRadiusZ; k <= layerRadiusZ; ++k) {
+                float x = tipCenter.x + i * spacing;
                 float y = origin.y + j * spacing;
-                float z = origin.z + k * spacing;
+                float z = tipCenter.z + k * spacing;
+
                 solver.addParticle(MPMParticle(glm::vec3(x, y, z), glm::vec3(0.0f, -5000.0f, 0.0f), 1.0f));
             }
         }
