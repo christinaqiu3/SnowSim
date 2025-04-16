@@ -207,6 +207,60 @@ void MPMSolver::updateParticleDefGrad() {
 
         // UPDATE DEFORMATION GRADIENT
         p.FE = (glm::mat3(1.f) + stepSize * velGrad) * p.FE;
+
+
+        // Predict the new total deformation gradient (FE * FP)
+        glm::mat3 F_total = (glm::mat3(1.0f) + stepSize * velGrad) * p.FE * p.FP;
+
+        // Predict the new elastic deformation gradient
+        glm::mat3 FE_hat = (glm::mat3(1.0f) + stepSize * velGrad) * p.FE;
+
+        // Convert to Eigen for SVD
+        Eigen::Matrix3f FE_hat_eigen;
+        for (int col = 0; col < 3; ++col)
+            for (int row = 0; row < 3; ++row)
+                FE_hat_eigen(row, col) = FE_hat[col][row];
+
+        // SVD: FE_hat = U * Σ * V^T
+        Eigen::JacobiSVD<Eigen::Matrix3f> svd(FE_hat_eigen, Eigen::ComputeFullU | Eigen::ComputeFullV);
+        Eigen::Matrix3f U = svd.matrixU();
+        Eigen::Matrix3f V = svd.matrixV();
+        Eigen::Vector3f sigma_hat = svd.singularValues(); // Σ̂
+
+        // Clamp singular values to [1 - θc, 1 + θs]
+        Eigen::Vector3f sigma_clamped = sigma_hat;
+        for (int i = 0; i < 3; ++i)
+            sigma_clamped[i] = std::clamp(sigma_hat[i], 1.0f - critCompression, 1.0f + critStretch);
+
+        // Reconstruct clamped FE
+        Eigen::Matrix3f Sigma_clamped = Eigen::Matrix3f::Zero();
+        for (int i = 0; i < 3; ++i)
+            Sigma_clamped(i, i) = sigma_clamped[i];
+
+        Eigen::Matrix3f FE_new = U * Sigma_clamped * V.transpose();
+        Eigen::Matrix3f F_total_eigen;
+        for (int col = 0; col < 3; ++col)
+            for (int row = 0; row < 3; ++row)
+                F_total_eigen(row, col) = F_total[col][row];
+
+        // Update FP using: FP = V * Σ⁻¹ * Uᵀ * F_total
+        Eigen::Matrix3f Sigma_inv = Eigen::Matrix3f::Zero();
+        for (int i = 0; i < 3; ++i)
+            Sigma_inv(i, i) = 1.0f / sigma_clamped[i];
+
+        Eigen::Matrix3f FP_new = V * Sigma_inv * U.transpose() * F_total_eigen;
+
+        // Store back FE and FP
+        for (int col = 0; col < 3; ++col)
+            for (int row = 0; row < 3; ++row) {
+                p.FE[col][row] = FE_new(row, col);
+                p.FP[col][row] = FP_new(row, col);
+            }
+
+
+
+
+
         // UPDATE POINT POSITIONS
         p.position += stepSize * p.velocity;
 
