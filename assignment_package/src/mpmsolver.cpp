@@ -80,7 +80,7 @@ static float weightFun (float x) {
 
 static float weightFunGradient (float x) {
     x = abs(x);
-    if (x >= 0.f && x < 1.f) {
+    if (x > 0.f && x < 1.f) {
         return 3.f*abs(x)/(2.f*x) - 2.f*x;
     } else if (x >= 1.f && x < 2.f) {
         return -abs(x)/(2.f*x)*x*x + 2.f*x - 2.f*(abs(x)/x);
@@ -179,6 +179,8 @@ void MPMSolver::updateParticleDefGrad() {
 
                     // TRANSFER WEIGHTED VELOCITY FROM GRID TO PARTICLE
                     //p.velocity += curNode.velocity * weight;
+                    if (glm::any(glm::isnan(curNode.velocity))) continue; // THIS IS WHERE NANS ARE COMING FROM
+
 
                     glm::vec3 gradWeight;
                     gradWeight[0] = 1.f / grid.spacing * weightFunGradient(xGrid) * weightFun(yGrid) * weightFun(zGrid);
@@ -470,7 +472,7 @@ void MPMSolver::updateGridVel() {
     for (GridNode& g : grid.gridNodes) {
         if (g.mass > 0.f) {
             // COMPUTE VEL FROM GRID FORCES
-            g.prevVelovity = g.velocity;
+            g.prevVelocity = g.velocity;
             g.velocity += stepSize * (1.f/g.mass) * g.force;
 
             // VERY SIMPLE BOUNDING COLLISION
