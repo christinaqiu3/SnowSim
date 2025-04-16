@@ -3,7 +3,7 @@
 #include <Eigen/Dense>
 
 const float dt = 0.01f; // Time step
-const float gravity = -9.81f; // Gravity acceleration
+const float gravity = 9.81f; // Gravity acceleration
 const float cohesionStrength = 0.1f; // Cohesion force factor
 
 MPMSolver::MPMSolver(glm::vec3 gridDim, float spacing, glm::vec3 gridOrigin, float dt,
@@ -149,6 +149,8 @@ void MPMSolver::updateParticleDefGrad() {
         int j = static_cast<int>(std::floor((y - yMin) / grid.spacing ));
         int k = static_cast<int>(std::floor((z - zMin) / grid.spacing ));
 
+        glm::vec3 vPic = glm::vec3(0.f);
+        glm::vec3 vFlip = glm::vec3(0.f);
         // YOU NEED TO DO THIS FOR ALL CELLS WITHIN SOME RADIUS
         for(int di = -2; di < 2; di++) {
             for(int dj = -2; dj < 2; dj++) {
@@ -186,74 +188,27 @@ void MPMSolver::updateParticleDefGrad() {
                     // THIS IS v * gradW^T
                     velGrad += glm::outerProduct(curNode.velocity, gradWeight);
 
-                    // NAIVE WAY OF UPDATING VELOCITY
-                    // GO BACK AND DO THE PIC/FLIP METHOD FOR BETTER RESUTLS
-                    p.velocity += curNode.velocity * weight;
+                    vPic += curNode.velocity * weight;
+                    vFlip += (curNode.velocity - curNode.prevVelovity) * weight;
                 }
             }
         }
+        vFlip += p.velocity;
+        // UPDATE POINT VELOCITY
+
+        float alpha = 0.95f; // Recommended 0.95
+
+        p.velocity = (1.f - alpha) * vPic + alpha * vFlip;
 
         // UPDATE DEFORMATION GRADIENT
-
-        // Predict the new total deformation gradient (FE * FP)
-        glm::mat3 F_total = (glm::mat3(1.0f) + stepSize * velGrad) * p.FE * p.FP;
-
-        // Predict the new elastic deformation gradient
-        glm::mat3 FE_hat = (glm::mat3(1.0f) + stepSize * velGrad) * p.FE;
-
-        // Convert to Eigen for SVD
-        Eigen::Matrix3f FE_hat_eigen;
-        for (int col = 0; col < 3; ++col)
-            for (int row = 0; row < 3; ++row)
-                FE_hat_eigen(row, col) = FE_hat[col][row];
-
-        // SVD: FE_hat = U * Σ * V^T
-        Eigen::JacobiSVD<Eigen::Matrix3f> svd(FE_hat_eigen, Eigen::ComputeFullU | Eigen::ComputeFullV);
-        Eigen::Matrix3f U = svd.matrixU();
-        Eigen::Matrix3f V = svd.matrixV();
-        Eigen::Vector3f sigma_hat = svd.singularValues(); // Σ̂
-
-        // Clamp singular values to [1 - θc, 1 + θs]
-        Eigen::Vector3f sigma_clamped = sigma_hat;
-        for (int i = 0; i < 3; ++i)
-            sigma_clamped[i] = std::clamp(sigma_hat[i], 1.0f - critCompression, 1.0f + critStretch);
-
-        // Reconstruct clamped FE
-        Eigen::Matrix3f Sigma_clamped = Eigen::Matrix3f::Zero();
-        for (int i = 0; i < 3; ++i)
-            Sigma_clamped(i, i) = sigma_clamped[i];
-
-        Eigen::Matrix3f FE_new = U * Sigma_clamped * V.transpose();
-        Eigen::Matrix3f F_total_eigen;
-        for (int col = 0; col < 3; ++col)
-            for (int row = 0; row < 3; ++row)
-                F_total_eigen(row, col) = F_total[col][row];
-
-        // Update FP using: FP = V * Σ⁻¹ * Uᵀ * F_total
-        Eigen::Matrix3f Sigma_inv = Eigen::Matrix3f::Zero();
-        for (int i = 0; i < 3; ++i)
-            Sigma_inv(i, i) = 1.0f / sigma_clamped[i];
-
-        Eigen::Matrix3f FP_new = V * Sigma_inv * U.transpose() * F_total_eigen;
-
-        // Store back FE and FP
-        for (int col = 0; col < 3; ++col)
-            for (int row = 0; row < 3; ++row) {
-                p.FE[col][row] = FE_new(row, col);
-                p.FP[col][row] = FP_new(row, col);
-            }
-
-
-
-
-
+        p.FE = (glm::mat3(1.f) + stepSize * velGrad) * p.FE;
         // UPDATE POINT POSITIONS
         p.position += stepSize * p.velocity;
 
         glm::vec3 minCorner = grid.center - 0.5f * grid.dimension;
         glm::vec3 maxCorner = grid.center + 0.5f * grid.dimension;
 
-        float damping = 0.0f; // or try 0.01f, 0.1f for bounciness
+        float damping = 0.001f; // or try 0.01f, 0.1f for bounciness
 
         for (MPMParticle &p : particles) {
             for (int axis = 0; axis < 3; ++axis) {
@@ -512,11 +467,8 @@ void MPMSolver::updateGridVel() {
     for (GridNode& g : grid.gridNodes) {
         if (g.mass > 0.f) {
             // COMPUTE VEL FROM GRID FORCES
+            g.prevVelovity = g.velocity;
             g.velocity += stepSize * (1.f/g.mass) * g.force;
-
-            if (!std::isfinite(gridNode.velocity.x) || !std::isfinite(gridNode.velocity.y) || !std::isfinite(gridNode.velocity.z)) {
-                std::cerr << "Bad velocity at node " << i << ": " << gridNode.velocity << "\n";
-            }
 
             // VERY SIMPLE BOUNDING COLLISION
             // CLAMP VELOCITY AT BOUNDS

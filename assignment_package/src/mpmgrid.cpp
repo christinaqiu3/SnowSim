@@ -2,7 +2,7 @@
 #include <cmath>
 
 GridNode::GridNode()
-    : velocity(0.f, 0.f, 0.f), mass(0.f), density(0.f), force(0.f, 0.f, 0.f),
+    : velocity(0.f, 0.f, 0.f), prevVelovity(0.f, 0.f, 0.f), mass(0.f), density(0.f), force(0.f, 0.f, 0.f),
     worldPos(0.f, 0.f, 0.f), idx(0, 0, 0)
 {}
 
