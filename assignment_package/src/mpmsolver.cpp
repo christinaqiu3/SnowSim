@@ -101,6 +101,8 @@ void MPMSolver::computeSigma() {
             for (int row = 0; row < 3; ++row) {
                 Fe(row, col) = p.FE[col][row];
                 Fp(row, col) = p.FP[col][row];
+                Fe(row, col) = p.FE[row][col];
+                Fp(row, col) = p.FP[row][col];
             }
         }
 
@@ -190,12 +192,15 @@ void MPMSolver::updateParticleDefGrad() {
 
                     vPic += curNode.velocity * weight;
                     vFlip += (curNode.velocity - curNode.prevVelocity) * weight;
+
+                    // THIS IS THE OLD INCCORECT WAY OF UPDATING VELOCITY
+                    // IT GIVES MOTION, BUT IS WRONG
+                    //p.velocity += curNode.velocity * weight;
                 }
             }
         }
-        vFlip += p.velocity;
-        // UPDATE POINT VELOCITY
 
+        vFlip += p.velocity;
         float alpha = 0.95f; // Recommended 0.95
 
         p.velocity = (1.f - alpha) * vPic + alpha * vFlip;
@@ -205,25 +210,23 @@ void MPMSolver::updateParticleDefGrad() {
         // UPDATE POINT POSITIONS
         p.position += stepSize * p.velocity;
 
-        glm::vec3 minCorner = grid.center - 0.5f * grid.dimension;
-        glm::vec3 maxCorner = grid.center + 0.5f * grid.dimension;
+    }
 
-        float damping = 0.001f; // or try 0.01f, 0.1f for bounciness
 
-        for (MPMParticle &p : particles) {
-            for (int axis = 0; axis < 3; ++axis) {
-                if (p.position[axis] < minCorner[axis]) {
-                    p.position[axis] = minCorner[axis];
-                    if (p.velocity[axis] < 0.f) {
-                        p.velocity[axis] *= -damping;
-                    }
+    float damping = 0.001f; // or try 0.01f, 0.1f for bounciness
+    for (MPMParticle &p : particles) {
+        for (int axis = 0; axis < 3; ++axis) {
+            if (p.position[axis] < minCorner[axis]) {
+                p.position[axis] = minCorner[axis];
+                if (p.velocity[axis] < 0.f) {
+                    p.velocity[axis] *= -damping;
                 }
+            }
 
-                if (p.position[axis] > maxCorner[axis]) {
-                    p.position[axis] = maxCorner[axis];
-                    if (p.velocity[axis] > 0.f) {
-                        p.velocity[axis] *= -damping;
-                    }
+            if (p.position[axis] > maxCorner[axis]) {
+                p.position[axis] = maxCorner[axis];
+                if (p.velocity[axis] > 0.f) {
+                    p.velocity[axis] *= -damping;
                 }
             }
         }
@@ -447,7 +450,7 @@ void MPMSolver::computeForce() {
                     gradWeight[1] = 1.f / grid.spacing * weightFun(xGrid) * weightFunGradient(yGrid) * weightFun(zGrid);
                     gradWeight[2] = 1.f / grid.spacing * weightFun(xGrid) * weightFun(yGrid) * weightFunGradient(zGrid);
 
-                    curNode.force -= p.volume * p.sigma * gradWeight + computeGravity(p);
+                    curNode.force -= (p.volume * p.sigma * gradWeight + (glm::vec3(0.f, gravity, 0.f) * p.mass));
                 }
             }
         }
