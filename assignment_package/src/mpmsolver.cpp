@@ -99,8 +99,6 @@ void MPMSolver::computeSigma() {
 
         for (int col = 0; col < 3; ++col) {
             for (int row = 0; row < 3; ++row) {
-                Fe(row, col) = p.FE[col][row];
-                Fp(row, col) = p.FP[col][row];
                 Fe(row, col) = p.FE[row][col];
                 Fp(row, col) = p.FP[row][col];
             }
@@ -212,6 +210,8 @@ void MPMSolver::updateParticleDefGrad() {
 
     }
 
+    glm::vec3 minCorner = grid.center - 0.5f * grid.dimension;
+    glm::vec3 maxCorner = grid.center + 0.5f * grid.dimension;
 
     float damping = 0.001f; // or try 0.01f, 0.1f for bounciness
     for (MPMParticle &p : particles) {
