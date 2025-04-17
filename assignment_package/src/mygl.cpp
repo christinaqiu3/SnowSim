@@ -211,30 +211,30 @@ void MyGL::on_loadButton_clicked() {
 
 
 void MyGL::initializeMPM() {
-    solver = MPMSolver(glm::vec3(2.0, 2.0, 2.0), 0.05, glm::vec3(0.0f, 0.0f, 0.0f), 0.00001f,
+    solver = MPMSolver(glm::vec3(2.0, 5.0, 2.0), 0.01, glm::vec3(0.0f, 0.0f, 0.0f), 0.001f,
                         0.025f, 0.0075f, 10.f, 400.f, 140000.f, 0.2);  // Reset simulation
 
     std::vector<QVector4D> particlePositions;
     float spacing = 0.1f;
-    glm::vec3 dim = glm::vec3(12, 12, 12);
+    glm::vec3 dim = glm::vec3(5, 40, 5);
     glm::vec3 origin = glm::vec3(float(dim.x), float(dim.y), float(dim.z));
     origin *= spacing * -0.5;
 
     // CUBE TEST
 
-    // for (int i = 0; i < dim.x; ++i)
-    // {
-    //     for (int j = 0; j < dim.y; ++j)
-    //     {
-    //         for (int k = 0; k < dim.z; ++k)
-    //         {
-    //             float x = origin.x + i * spacing;
-    //             float y = origin.y + j * spacing;
-    //             float z = origin.z + k * spacing;
-    //             solver.addParticle(MPMParticle(glm::vec3(x, y, z), glm::vec3(0.0f, -5000.0f, 0.0f), 1.0f));
-    //         }
-    //     }
-    // }
+    for (int i = 0; i < dim.x; ++i)
+    {
+        for (int j = 0; j < dim.y; ++j)
+        {
+            for (int k = 0; k < dim.z; ++k)
+            {
+                float x = origin.x + i * spacing;
+                float y = origin.y + j * spacing;
+                float z = origin.z + k * spacing;
+                solver.addParticle(MPMParticle(glm::vec3(x, y, z), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f));
+            }
+        }
+    }
 
 
     // SPHERE TEST
@@ -251,7 +251,7 @@ void MyGL::initializeMPM() {
 
     //             glm::vec3 pos(x, y, z);
     //             if (glm::length(pos - center) <= radius) {
-    //                 solver.addParticle(MPMParticle(pos, glm::vec3(0.0f, -5000.0f, 0.0f), 1.0f));
+    //                 solver.addParticle(MPMParticle(pos, glm::vec3(0.0f, 0.0f, 0.0f), 1.f));
     //             }
     //         }
     //     }
@@ -280,25 +280,25 @@ void MyGL::initializeMPM() {
 
     // UPSIDE DOWN PYRAMID TEST
 
-    glm::vec3 tipCenter = origin + glm::vec3(0.5f * dim.x * spacing, 0.0f, 0.5f * dim.z * spacing);
-    int maxHeight = dim.y;
-    float baseMultiplier = 2.0f; // Make the base 2x wider than default
+    // glm::vec3 tipCenter = origin + glm::vec3(0.5f * dim.x * spacing, 0.0f, 0.5f * dim.z * spacing);
+    // int maxHeight = dim.y;
+    // float baseMultiplier = 2.0f; // Make the base 2x wider than default
 
-    for (int j = 0; j < dim.y; ++j) {
-        float layerScale = static_cast<float>(j) / maxHeight;
-        int layerRadiusX = static_cast<int>(0.5f * dim.x * layerScale * baseMultiplier);
-        int layerRadiusZ = static_cast<int>(0.5f * dim.z * layerScale * baseMultiplier);
+    // for (int j = 0; j < dim.y; ++j) {
+    //     float layerScale = static_cast<float>(j) / maxHeight;
+    //     int layerRadiusX = static_cast<int>(0.5f * dim.x * layerScale * baseMultiplier);
+    //     int layerRadiusZ = static_cast<int>(0.5f * dim.z * layerScale * baseMultiplier);
 
-        for (int i = -layerRadiusX; i <= layerRadiusX; ++i) {
-            for (int k = -layerRadiusZ; k <= layerRadiusZ; ++k) {
-                float x = tipCenter.x + i * spacing;
-                float y = origin.y + j * spacing;
-                float z = tipCenter.z + k * spacing;
+    //     for (int i = -layerRadiusX; i <= layerRadiusX; ++i) {
+    //         for (int k = -layerRadiusZ; k <= layerRadiusZ; ++k) {
+    //             float x = tipCenter.x + i * spacing;
+    //             float y = origin.y + j * spacing;
+    //             float z = tipCenter.z + k * spacing;
 
-                solver.addParticle(MPMParticle(glm::vec3(x, y, z), glm::vec3(0.0f, -5000.0f, 0.0f), 1.0f));
-            }
-        }
-    }
+    //             solver.addParticle(MPMParticle(glm::vec3(x, y, z), glm::vec3(0.0f, -5000.0f, 0.0f), 1.0f));
+    //         }
+    //     }
+    // }
 
     solver.computeInitialDensity();
 

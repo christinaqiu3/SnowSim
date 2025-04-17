@@ -13,8 +13,10 @@ MPMSolver::MPMSolver(glm::vec3 gridDim, float spacing, glm::vec3 gridOrigin, flo
     critCompression(critCompression), critStretch(critStretch), hardeningCoeff(hardeningCoeff),
     initialDensity(initialDensity), youngsMod(youngsMod), poissonRatio(poissonRatio)
 {
-    mu0 = youngsMod / (2.f * (1.f + poissonRatio));
-    lambda0 = (youngsMod * poissonRatio) / ((1.f+poissonRatio) + (1.f - 2.f*poissonRatio));
+    mu0 = (youngsMod * poissonRatio) / ((1.f+poissonRatio) + (1.f - 2.f*poissonRatio));
+    lambda0 = youngsMod / (2.f * (1.f + poissonRatio));
+
+
 }
 
 void MPMSolver::addParticle(const MPMParticle& particle) {
@@ -256,9 +258,6 @@ void MPMSolver::updateParticleDefGrad() {
                 p.FE[col][row] = FE_new(row, col);
                 p.FP[col][row] = FP_new(row, col);
             }
-
-
-
 
 
         // UPDATE POINT POSITIONS
@@ -521,7 +520,9 @@ void MPMSolver::computeForce() {
                     gradWeight[1] = 1.f / grid.spacing * weightFun(xGrid) * weightFunGradient(yGrid) * weightFun(zGrid);
                     gradWeight[2] = 1.f / grid.spacing * weightFun(xGrid) * weightFun(yGrid) * weightFunGradient(zGrid);
 
-                    curNode.force -= (p.volume * p.sigma * gradWeight + (glm::vec3(0.f, gravity, 0.f) * p.mass));
+                    float weight = weightFun(xGrid) * weightFun(yGrid) * weightFun(zGrid);
+
+                    curNode.force -= (curNode.force * p.volume * weight + (glm::vec3(0.f, gravity, 0.f) * p.mass));//(p.volume * p.sigma * gradWeight + (glm::vec3(0.f, gravity, 0.f) * p.mass));
                 }
             }
         }
