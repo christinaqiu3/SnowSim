@@ -111,6 +111,8 @@ void MyGL::paintGL()
     m_progLambert.setCamPos(glm::vec3(m_glCamera.eye));
     m_progFlat.setModelMatrix(glm::mat4(1.f));
 
+
+
     // m_prog_skeleton.setViewProjMatrix(m_glCamera.getViewProj());
     // m_prog_skeleton.setModelMatrix(glm::mat4(1.f));//does model matriux need overall transform?
 
@@ -211,51 +213,51 @@ void MyGL::on_loadButton_clicked() {
 
 
 void MyGL::initializeMPM() {
-    solver = MPMSolver(glm::vec3(2.0, 5.0, 2.0), 0.01, glm::vec3(0.0f, 0.0f, 0.0f), 0.001f,
+    solver = MPMSolver(glm::vec3(2.0, 2.0, 2.0), 0.1, glm::vec3(0.0f, 0.0f, 0.0f), 0.001f,
                         0.025f, 0.0075f, 10.f, 400.f, 140000.f, 0.2);  // Reset simulation
 
     std::vector<QVector4D> particlePositions;
     float spacing = 0.1f;
-    glm::vec3 dim = glm::vec3(5, 40, 5);
+    glm::vec3 dim = glm::vec3(12, 12, 12);
     glm::vec3 origin = glm::vec3(float(dim.x), float(dim.y), float(dim.z));
     origin *= spacing * -0.5;
 
     // CUBE TEST
 
-    for (int i = 0; i < dim.x; ++i)
-    {
-        for (int j = 0; j < dim.y; ++j)
-        {
-            for (int k = 0; k < dim.z; ++k)
-            {
-                float x = origin.x + i * spacing;
-                float y = origin.y + j * spacing;
-                float z = origin.z + k * spacing;
-                solver.addParticle(MPMParticle(glm::vec3(x, y, z), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f));
-            }
-        }
-    }
+    // for (int i = 0; i < dim.x; ++i)
+    // {
+    //     for (int j = 0; j < dim.y; ++j)
+    //     {
+    //         for (int k = 0; k < dim.z; ++k)
+    //         {
+    //             float x = origin.x + i * spacing;
+    //             float y = origin.y + j * spacing;
+    //             float z = origin.z + k * spacing;
+    //             solver.addParticle(MPMParticle(glm::vec3(x, y, z), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f));
+    //         }
+    //     }
+    // }
 
 
     // SPHERE TEST
 
-    // float radius = 0.5f * std::min({dim.x, dim.y, dim.z}) * spacing; // or any radius you want
-    // glm::vec3 center = origin + 0.5f * glm::vec3(dim) * spacing;
+    float radius = 0.5f * std::min({dim.x, dim.y, dim.z}) * spacing; // or any radius you want
+    glm::vec3 center = origin + 0.5f * glm::vec3(dim) * spacing;
 
-    // for (int i = 0; i < dim.x; ++i) {
-    //     for (int j = 0; j < dim.y; ++j) {
-    //         for (int k = 0; k < dim.z; ++k) {
-    //             float x = origin.x + i * spacing;
-    //             float y = origin.y + j * spacing;
-    //             float z = origin.z + k * spacing;
+    for (int i = 0; i < dim.x; ++i) {
+        for (int j = 0; j < dim.y; ++j) {
+            for (int k = 0; k < dim.z; ++k) {
+                float x = origin.x + i * spacing;
+                float y = origin.y + j * spacing;
+                float z = origin.z + k * spacing;
 
-    //             glm::vec3 pos(x, y, z);
-    //             if (glm::length(pos - center) <= radius) {
-    //                 solver.addParticle(MPMParticle(pos, glm::vec3(0.0f, 0.0f, 0.0f), 1.f));
-    //             }
-    //         }
-    //     }
-    // }
+                glm::vec3 pos(x, y, z);
+                if (glm::length(pos - center) <= radius) {
+                    solver.addParticle(MPMParticle(pos, glm::vec3(0.0f, 0.0f, 0.0f), 1.f));
+                }
+            }
+        }
+    }
 
     // PYRAMID TEST
 

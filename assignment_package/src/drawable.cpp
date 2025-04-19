@@ -29,7 +29,8 @@ GLenum Drawable::drawMode()
 
     // If we wanted to draw a wireframe, we would return GL_LINES
 
-    return GL_TRIANGLES;
+    //return GL_TRIANGLES;
+    return GL_LINES;
 }
 
 int Drawable::elemCount()

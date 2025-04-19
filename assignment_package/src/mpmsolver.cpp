@@ -349,7 +349,7 @@ void MPMSolver::particleToGridTransfer() {
         }
     }
 
-    // Normalize grid node velocities using only effective mass
+    //Normalize grid node velocities using only effective mass
     for (GridNode& node : grid.gridNodes) {
         if (node.velocityMass > 0.f) {
             node.velocity /= node.velocityMass;
@@ -522,7 +522,8 @@ void MPMSolver::computeForce() {
 
                     float weight = weightFun(xGrid) * weightFun(yGrid) * weightFun(zGrid);
 
-                    curNode.force -= (curNode.force * p.volume * weight + (glm::vec3(0.f, gravity, 0.f) * p.mass));//(p.volume * p.sigma * gradWeight + (glm::vec3(0.f, gravity, 0.f) * p.mass));
+                    curNode.force -= (p.volume * p.sigma * gradWeight + (glm::vec3(0.f, gravity, 0.f) * p.mass));//(curNode.force * p.volume * weight + (glm::vec3(0.f, 50.0, 0.f) * p.mass));
+                    //(p.volume * p.sigma * gradWeight + (glm::vec3(0.f, gravity, 0.f) * p.mass));
                 }
             }
         }
