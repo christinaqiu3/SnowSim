@@ -179,13 +179,16 @@ void MyGL::paintGL()
 
 
     //std::cout << "Size1 = " << particlePositions.size() << std::endl;
-    solver.step();
+    //for (int i = 0; i<10; i++) {
+        solver.step(); // STEP MULTIPLE TIMES WITH SMALL TIME STEPS
+    //}
+
     std::vector<glm::vec4> particlePositions;
     for (int i = 0; i<solver.getParticles().size(); i++) {
         particlePositions.emplace_back(solver.getParticles()[i].position, 1.0f);
     }
 
-    std::cout<< particlePositions[0].x << ", " << particlePositions[0].y << ", " << particlePositions[0].z << std::endl;
+    //std::cout<< particlePositions[0].x << ", " << particlePositions[0].y << ", " << particlePositions[0].z << std::endl;
 
     particleDrawable->updateParticles(particlePositions); // Update OpenGL buffer
 
@@ -211,51 +214,57 @@ void MyGL::on_loadButton_clicked() {
 
 
 void MyGL::initializeMPM() {
-    solver = MPMSolver(glm::vec3(2.0, 5.0, 2.0), 0.01, glm::vec3(0.0f, 0.0f, 0.0f), 0.001f,
+    // MPMSolver(glm::vec3 gridDim, float spacing, glm::vec3 gridOrigin, float dt,
+    //           float critCompression, float critStretch,
+    //           float hardeningCoeff, float initialDensity, float youngsMod,
+    //           float poissonRatio);
+    solver = MPMSolver(glm::vec3(2.5, 2.5, 2.5), 0.1, glm::vec3(0.0f, 0.0f, 0.0f), 0.001,
                         0.025f, 0.0075f, 10.f, 400.f, 140000.f, 0.2);  // Reset simulation
+    // REDUCED INITIAL DENSITY, YOUNGS MOD, AND POISSONRATIO
+    // SEEMS TO HAVE SLIGHTLY REDUCED ASYMETRIC FALLING??
 
     std::vector<QVector4D> particlePositions;
-    float spacing = 0.1f;
-    glm::vec3 dim = glm::vec3(5, 40, 5);
+    float spacing = 0.14f;
+    glm::vec3 dim = glm::vec3(16, 16, 16);
     glm::vec3 origin = glm::vec3(float(dim.x), float(dim.y), float(dim.z));
     origin *= spacing * -0.5;
 
     // CUBE TEST
 
-    for (int i = 0; i < dim.x; ++i)
-    {
-        for (int j = 0; j < dim.y; ++j)
-        {
-            for (int k = 0; k < dim.z; ++k)
-            {
-                float x = origin.x + i * spacing;
-                float y = origin.y + j * spacing;
-                float z = origin.z + k * spacing;
-                solver.addParticle(MPMParticle(glm::vec3(x, y, z), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f));
-            }
-        }
-    }
+    // for (int i = 0; i < dim.x; ++i)
+    // {
+    //     for (int j = 0; j < dim.y; ++j)
+    //     {
+    //         for (int k = 0; k < dim.z; ++k)
+    //         {
+    //             float x = origin.x + i * spacing;
+    //             float y = origin.y + j * spacing;
+    //             float z = origin.z + k * spacing;
+    //             solver.addParticle(MPMParticle(glm::vec3(x, y, z), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f));
+    //         }
+    //     }
+    // }
 
 
     // SPHERE TEST
 
-    // float radius = 0.5f * std::min({dim.x, dim.y, dim.z}) * spacing; // or any radius you want
-    // glm::vec3 center = origin + 0.5f * glm::vec3(dim) * spacing;
+    float radius = 0.5f * std::min({dim.x, dim.y, dim.z}) * spacing; // or any radius you want
+    glm::vec3 center = origin + 0.5f * glm::vec3(dim) * spacing;
 
-    // for (int i = 0; i < dim.x; ++i) {
-    //     for (int j = 0; j < dim.y; ++j) {
-    //         for (int k = 0; k < dim.z; ++k) {
-    //             float x = origin.x + i * spacing;
-    //             float y = origin.y + j * spacing;
-    //             float z = origin.z + k * spacing;
+    for (int i = 0; i < dim.x; ++i) {
+        for (int j = 0; j < dim.y; ++j) {
+            for (int k = 0; k < dim.z; ++k) {
+                float x = origin.x + i * spacing;
+                float y = origin.y + j * spacing;
+                float z = origin.z + k * spacing;
 
-    //             glm::vec3 pos(x, y, z);
-    //             if (glm::length(pos - center) <= radius) {
-    //                 solver.addParticle(MPMParticle(pos, glm::vec3(0.0f, 0.0f, 0.0f), 1.f));
-    //             }
-    //         }
-    //     }
-    // }
+                glm::vec3 pos(x, y, z);
+                if (glm::length(pos - center) <= radius) {
+                    solver.addParticle(MPMParticle(pos, glm::vec3(0.0f, 0.0f, 0.0f), 0.1f));
+                }
+            }
+        }
+    }
 
     // PYRAMID TEST
 
@@ -314,6 +323,8 @@ void MyGL::initializeMPM() {
     }
 }
 
+
+// THIS DOESN"T GET USED
 void MyGL::updateSimulation() {
     solver.computeForcesAndIntegrate(); // Step simulation forward
 }

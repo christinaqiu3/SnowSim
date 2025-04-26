@@ -25,10 +25,10 @@ void ParticleDrawable::create() {
 }
 
 void ParticleDrawable::updateParticles(const std::vector<glm::vec4>& newPositions) {
-    std::cout << "Size1 = " << newPositions.size() << std::endl;
-    std::cout << "Size2 = " << positions.size() << std::endl;
+    //std::cout << "Size1 = " << newPositions.size() << std::endl;
+    //std::cout << "Size2 = " << positions.size() << std::endl;
     positions = newPositions;
-    std::cout << "Size2 = " << positions.size() << std::endl;
+    //std::cout << "Size2 = " << positions.size() << std::endl;
     create();
 }
 

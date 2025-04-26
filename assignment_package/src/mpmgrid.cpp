@@ -75,6 +75,8 @@ void mpmgrid::clearGrid() {
     for (GridNode& node : gridNodes) {
         node.mass = 0.0f;
         node.velocity = glm::vec3(0.f, 0.f, 0.f);
+        node.density = 0.0;
+        node.force = glm::vec3(0.f, 0.f, 0.f);
     }
 }
 
