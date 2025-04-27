@@ -238,6 +238,8 @@ void MPMSolver::updateParticleDefGrad() {
         float alpha = 0.80f;
 
         p.velocity = (1.f - alpha) * vPic + alpha * vFlip;
+        const float damping = 0.01f;     // 1% velocity loss each step
+        p.velocity *= (1.0f - damping);
 
         // UPDATE DEFORMATION GRADIENT
         p.FE = (glm::mat3(1.f) + stepSize * velGrad) * p.FE;
@@ -305,29 +307,29 @@ void MPMSolver::updateParticleDefGrad() {
     }
 
 
-    glm::vec3 minCorner = grid.center - 0.5f * grid.dimension;
-    glm::vec3 maxCorner = grid.center + 0.5f * grid.dimension;
+    // glm::vec3 minCorner = grid.center - 0.5f * grid.dimension;
+    // glm::vec3 maxCorner = grid.center + 0.5f * grid.dimension;
 
 
-    //THIS IS DOING NOTHING : :
-    float damping = 0.0f; // or try 0.01f, 0.1f for bounciness
-    for (MPMParticle &p : particles) {
-        for (int axis = 0; axis < 3; ++axis) {
-            if (p.position[axis] < minCorner[axis]) {
-                p.position[axis] = minCorner[axis];
-                if (p.velocity[axis] < 0.f) {
-                    p.velocity[axis] *= -damping;
-                }
-            }
+    // //THIS IS DOING NOTHING : :
+    // float damping = 0.0f; // or try 0.01f, 0.1f for bounciness
+    // for (MPMParticle &p : particles) {
+    //     for (int axis = 0; axis < 3; ++axis) {
+    //         if (p.position[axis] < minCorner[axis]) {
+    //             p.position[axis] = minCorner[axis];
+    //             if (p.velocity[axis] < 0.f) {
+    //                 p.velocity[axis] *= -damping;
+    //             }
+    //         }
 
-            if (p.position[axis] > maxCorner[axis]) {
-                p.position[axis] = maxCorner[axis];
-                if (p.velocity[axis] > 0.f) {
-                    p.velocity[axis] *= -damping;
-                }
-            }
-        }
-    }
+    //         if (p.position[axis] > maxCorner[axis]) {
+    //             p.position[axis] = maxCorner[axis];
+    //             if (p.velocity[axis] > 0.f) {
+    //                 p.velocity[axis] *= -damping;
+    //             }
+    //         }
+    //     }
+    // }
 }
 
 // [======] GRID FUNCTIONS [======]
@@ -561,9 +563,10 @@ void MPMSolver::computeForce() {
                     gradWeight[1] = 1.f / grid.spacing * weightFun(xGrid) * weightFunGradient(yGrid) * weightFun(zGrid);
                     gradWeight[2] = 1.f / grid.spacing * weightFun(xGrid) * weightFun(yGrid) * weightFunGradient(zGrid);
 
-                    //float weight = weightFun(xGrid) * weightFun(yGrid) * weightFun(zGrid);
+                    float weight = weightFun(xGrid) * weightFun(yGrid) * weightFun(zGrid);
                     //
-                    curNode.force -= (p.volume * p.sigma * gradWeight) + (glm::vec3(0.f, gravity, 0.f) * p.mass);
+                    curNode.force -= (p.volume * p.sigma * gradWeight);
+                    curNode.force += weight * glm::vec3(0.f, -gravity, 0.f) * p.mass;
                 }
             }
         }

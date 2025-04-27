@@ -219,13 +219,13 @@ void MyGL::initializeMPM() {
     //           float hardeningCoeff, float initialDensity, float youngsMod,
     //           float poissonRatio);
     solver = MPMSolver(glm::vec3(2.5, 2.5, 2.5), 0.1, glm::vec3(0.0f, 0.0f, 0.0f), 0.001,
-                        0.025f, 0.0075f, 10.f, 400.f, 140000.f, 0.2);  // Reset simulation
+                        0.025f, 0.0075f, 10.f, 800.f, 180000.f, 0.25);  // Reset simulation
     // REDUCED INITIAL DENSITY, YOUNGS MOD, AND POISSONRATIO
     // SEEMS TO HAVE SLIGHTLY REDUCED ASYMETRIC FALLING??
 
     std::vector<QVector4D> particlePositions;
     float spacing = 0.14f;
-    glm::vec3 dim = glm::vec3(16, 16, 16);
+    glm::vec3 dim = glm::vec3(12, 12, 12);
     glm::vec3 origin = glm::vec3(float(dim.x), float(dim.y), float(dim.z));
     origin *= spacing * -0.5;
 
@@ -260,7 +260,7 @@ void MyGL::initializeMPM() {
 
                 glm::vec3 pos(x, y, z);
                 if (glm::length(pos - center) <= radius) {
-                    solver.addParticle(MPMParticle(pos, glm::vec3(0.0f, 0.0f, 0.0f), 0.1f));
+                    solver.addParticle(MPMParticle(pos, glm::vec3(0.0f, -10.0f, 0.0f), 1.f));
                 }
             }
         }
@@ -282,7 +282,7 @@ void MyGL::initializeMPM() {
     //             float y = origin.y + j * spacing;
     //             float z = baseCenter.z + k * spacing;
 
-    //             solver.addParticle(MPMParticle(glm::vec3(x, y, z), glm::vec3(0.0f, -5000.0f, 0.0f), 1.0f));
+    //             solver.addParticle(MPMParticle(glm::vec3(x, y, z), glm::vec3(0.0f, -5.0f, 0.0f), 1.0f));
     //         }
     //     }
     // }
@@ -291,7 +291,7 @@ void MyGL::initializeMPM() {
 
     // glm::vec3 tipCenter = origin + glm::vec3(0.5f * dim.x * spacing, 0.0f, 0.5f * dim.z * spacing);
     // int maxHeight = dim.y;
-    // float baseMultiplier = 2.0f; // Make the base 2x wider than default
+    // float baseMultiplier = 1.2f; // Make the base 2x wider than default
 
     // for (int j = 0; j < dim.y; ++j) {
     //     float layerScale = static_cast<float>(j) / maxHeight;
@@ -304,12 +304,13 @@ void MyGL::initializeMPM() {
     //             float y = origin.y + j * spacing;
     //             float z = tipCenter.z + k * spacing;
 
-    //             solver.addParticle(MPMParticle(glm::vec3(x, y, z), glm::vec3(0.0f, -5000.0f, 0.0f), 1.0f));
+    //             solver.addParticle(MPMParticle(glm::vec3(x, y, z), glm::vec3(0.0f, -10.0f, 0.0f), 1.0f));
     //         }
     //     }
     // }
 
     solver.computeInitialDensity();
+
 
     if (!particleDrawable) {
         particleDrawable = new ParticleDrawable(this);
@@ -317,6 +318,9 @@ void MyGL::initializeMPM() {
         // SETUP INITIAL DRAWABLE PARTICLES
         std::vector<glm::vec4> particlePositions;
         for (int i = 0; i<solver.getParticles().size(); i++) {
+            if (solver.getParticles()[i].volume <= 0.001) {
+                std::cout << "NO VOLUME" << std::endl;
+            }
             particlePositions.emplace_back(solver.getParticles()[i].position, 1.0f);
         }
         particleDrawable->updateParticles(particlePositions);
