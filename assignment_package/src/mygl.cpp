@@ -216,10 +216,9 @@ void MyGL::on_loadButton_clicked() {
 void MyGL::initializeMPM() {
     // MPMSolver(glm::vec3 gridDim, float spacing, glm::vec3 gridOrigin, float dt,
     //           float critCompression, float critStretch,
-    //           float hardeningCoeff, float initialDensity, float youngsMod,
-    //           float poissonRatio);
+    //           float hardeningCoeff, float initialDensity, float youngsMod,float poissonRatio);
     solver = MPMSolver(glm::vec3(2.5, 2.5, 2.5), 0.1, glm::vec3(0.0f, 0.0f, 0.0f), 0.001,
-                        0.025f, 0.0075f, 10.f, 800.f, 180000.f, 0.25);  // Reset simulation
+                        0.05f, 0.005f, 10.f, 600.f, 180000.f, 0.35);  // Reset simulation
     // REDUCED INITIAL DENSITY, YOUNGS MOD, AND POISSONRATIO
     // SEEMS TO HAVE SLIGHTLY REDUCED ASYMETRIC FALLING??
 
@@ -260,7 +259,7 @@ void MyGL::initializeMPM() {
 
                 glm::vec3 pos(x, y, z);
                 if (glm::length(pos - center) <= radius) {
-                    solver.addParticle(MPMParticle(pos, glm::vec3(0.0f, -10.0f, 0.0f), 1.f));
+                    solver.addParticle(MPMParticle(pos, glm::vec3(0.0f, -20.0f, 0.0f), 1.f));
                 }
             }
         }
@@ -319,7 +318,7 @@ void MyGL::initializeMPM() {
         std::vector<glm::vec4> particlePositions;
         for (int i = 0; i<solver.getParticles().size(); i++) {
             if (solver.getParticles()[i].volume <= 0.001) {
-                std::cout << "NO VOLUME" << std::endl;
+                std::cout << "NO VOLUME : " << solver.getParticles()[i].volume << std::endl;
             }
             particlePositions.emplace_back(solver.getParticles()[i].position, 1.0f);
         }
