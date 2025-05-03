@@ -573,8 +573,13 @@ void MPMSolver::computeForce() {
     }
 }
 
-float sphereSDF(const glm::vec3& pos, const glm::vec3& center, float radius) {
-    return glm::length(pos - center) - radius;
+float sphereSDF(const glm::vec3& pos, const Eigen::Vector3f& center, float radius) {
+    //Eigen::Vector3f posVec(pos.x, pos.y, pos.z);
+    //return (posVec - center).norm() - radius;
+    Eigen::Vector3f posVec(pos.x, pos.y, pos.z);
+    Eigen::Vector3f extent(0.5f, 0.5f, 0.5f);
+    Eigen::Vector3f q = (posVec - center).cwiseAbs() - extent;
+    return std::max(q.maxCoeff(), 0.0f) + std::min(std::max(q.x(), std::max(q.y(), q.z())), 0.0f);
 }
 
 
@@ -583,17 +588,16 @@ float sphereSDF(const glm::vec3& pos, const glm::vec3& center, float radius) {
 //                        I am just doing an explicit solve with the most basic collision handling possible.
 //                        For future implementation, fix this so that it fully implements the paper
 void MPMSolver::updateGridVel() {
-    glm::vec3 minCorner = grid.center - 0.5f * grid.dimension;
+    glm::vec3 minCorner = grid.center - 1.5f * grid.dimension;
     glm::vec3 maxCorner = grid.center + 0.5f * grid.dimension;
 
     float spacing = 0.14f;
-    glm::vec3 dim = glm::vec3(12, 12, 12);
-    glm::vec3 origin = glm::vec3(float(dim.x), float(dim.y), float(dim.z));
-    origin *= spacing * -0.5;
-    float sphereRadius = 0.5f * std::min({dim.x, dim.y, dim.z}) * spacing; // or any radius you want
-    glm::vec3 sphereCenter = origin + 0.5f * glm::vec3(dim) * spacing;
-    sphereCenter.y -= 1.5f;
-
+    Eigen::Vector3f dim(12.f, 12.f, 12.f);
+    Eigen::Vector3f origin = dim * (-0.5f * spacing);
+    float sphereRadius = 0.25f * std::min({dim.x(), dim.y(), dim.z()}) * spacing;
+    Eigen::Vector3f sphereCenter = origin + 0.5f * dim * spacing;
+    sphereCenter.y() -= 1.f;
+    
     // EXPLICIT UPDATE JUST TO TEST
     for (GridNode& g : grid.gridNodes) {
         if (g.mass > 0.f) {
@@ -605,16 +609,19 @@ void MPMSolver::updateGridVel() {
             float sdfVal = sphereSDF(g.worldPos, sphereCenter, sphereRadius);
             if (sdfVal < 0.f) {
                 // Calculate normal (gradient of SDF)
-                glm::vec3 normal = glm::normalize(g.worldPos - sphereCenter);
+                Eigen::Vector3f worldPosVec(g.worldPos.x, g.worldPos.y, g.worldPos.z);
+                Eigen::Vector3f normal = (worldPosVec - sphereCenter).normalized();
 
                 // Push node outside the sphere
-                g.worldPos -= sdfVal * normal;
+                glm::vec3 normalVec(normal.x(), normal.y(), normal.z());
+                g.worldPos -= sdfVal * normalVec;
 
                 // Zero out or reflect velocity (simple resolution)
-                float vn = glm::dot(g.velocity,normal);
-                float restitution = 0.1f; // 0 = stick, 1 = bounce
+                Eigen::Vector3f velVec(g.velocity.x, g.velocity.y, g.velocity.z);
+                float vn = velVec.dot(normal);
+                float restitution = 1.f; // 0 = stick, 1 = bounce
                 if (vn < 0.f) {
-                    g.velocity -= (1.0f + restitution) * vn * normal;
+                    g.velocity -= (1.0f + restitution) * vn * normalVec;
                 }
             }
 
