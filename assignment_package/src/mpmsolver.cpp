@@ -573,6 +573,10 @@ void MPMSolver::computeForce() {
     }
 }
 
+float sphereSDF(const glm::vec3& pos, const glm::vec3& center, float radius) {
+    return glm::normalize(pos - center).length() - radius;
+}
+
 
 // QUICK NOTE ABOUT THIS: The full implementation described in the paper uses a semi-implicit method for solving
 //                        which results in a more stable and complex system. Since this is a push to get something out
@@ -582,12 +586,36 @@ void MPMSolver::updateGridVel() {
     glm::vec3 minCorner = grid.center - 0.5f * grid.dimension;
     glm::vec3 maxCorner = grid.center + 0.5f * grid.dimension;
 
+    float spacing = 0.14f;
+    glm::vec3 dim = glm::vec3(12, 12, 12);
+    glm::vec3 origin = glm::vec3(float(dim.x), float(dim.y), float(dim.z));
+    origin *= spacing * -0.5;
+    float sphereRadius = 0.1f * std::min({dim.x, dim.y, dim.z}) * spacing; // or any radius you want
+    glm::vec3 sphereCenter = origin + 0.5f * glm::vec3(dim) * spacing;
+    sphereCenter.y -= 1.5f;
+
     // EXPLICIT UPDATE JUST TO TEST
     for (GridNode& g : grid.gridNodes) {
         if (g.mass > 0.f) {
             // COMPUTE VEL FROM GRID FORCES
             g.prevVelocity = g.velocity;
             g.velocity += stepSize * (1.f/g.mass) * g.force;
+
+            // --- Sphere collision test ---
+            float sdfVal = sphereSDF(g.worldPos, sphereCenter, sphereRadius);
+            if (sdfVal < 0.f) {
+                // Calculate normal (gradient of SDF)
+                glm::vec3 normal = glm::normalize(g.worldPos - sphereCenter);
+
+                // Push node outside the sphere
+                g.worldPos -= sdfVal * normal;
+
+                // Zero out or reflect velocity (simple resolution)
+                float vn = glm::dot(g.velocity,normal);
+                if (vn < 0.f) {
+                    g.velocity -= vn * normal; // remove inward normal velocity
+                }
+            }
 
             // VERY SIMPLE BOUNDING COLLISION
             // CLAMP VELOCITY AT BOUNDS
