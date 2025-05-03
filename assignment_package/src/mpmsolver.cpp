@@ -574,7 +574,7 @@ void MPMSolver::computeForce() {
 }
 
 float sphereSDF(const glm::vec3& pos, const glm::vec3& center, float radius) {
-    return glm::normalize(pos - center).length() - radius;
+    return glm::length(pos - center) - radius;
 }
 
 
@@ -590,7 +590,7 @@ void MPMSolver::updateGridVel() {
     glm::vec3 dim = glm::vec3(12, 12, 12);
     glm::vec3 origin = glm::vec3(float(dim.x), float(dim.y), float(dim.z));
     origin *= spacing * -0.5;
-    float sphereRadius = 0.1f * std::min({dim.x, dim.y, dim.z}) * spacing; // or any radius you want
+    float sphereRadius = 0.5f * std::min({dim.x, dim.y, dim.z}) * spacing; // or any radius you want
     glm::vec3 sphereCenter = origin + 0.5f * glm::vec3(dim) * spacing;
     sphereCenter.y -= 1.5f;
 
@@ -612,8 +612,9 @@ void MPMSolver::updateGridVel() {
 
                 // Zero out or reflect velocity (simple resolution)
                 float vn = glm::dot(g.velocity,normal);
+                float restitution = 0.1f; // 0 = stick, 1 = bounce
                 if (vn < 0.f) {
-                    g.velocity -= vn * normal; // remove inward normal velocity
+                    g.velocity -= (1.0f + restitution) * vn * normal;
                 }
             }
 
